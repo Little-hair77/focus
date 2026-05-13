@@ -16,17 +16,17 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Injeta o repositório SQLite [cite: 44, 115]
+        // Injeta o repositório SQLite 
         Provider(create: (_) => SQLiteTaskRepository()),
         
-        // Injeta o ViewModel de Tarefas e já busca os dados do banco [cite: 43, 70]
+        // Injeta o ViewModel de Tarefas e já busca os dados do banco 
         ChangeNotifierProvider(
           create: (context) => TaskViewModel(
             context.read<SQLiteTaskRepository>(),
           )..fetchTasks(), 
         ),
         
-        // Injeta o ViewModel de Tema carregado [cite: 105]
+        // Injeta o ViewModel de Tema carregado 
         ChangeNotifierProvider.value(value: themeViewModel),
       ],
       child: const FocusApp(),
@@ -39,17 +39,17 @@ class FocusApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Escuta o ThemeViewModel para mudar as cores do app [cite: 104]
+    // Escuta o ThemeViewModel para mudar as cores do app 
     final themeVM = context.watch<ThemeViewModel>();
 
     return MaterialApp(
       title: 'Focus',
       debugShowCheckedModeBanner: false,
-      // Gerencia o tema automaticamente entre Claro e Escuro [cite: 28]
+      // Gerencia o tema automaticamente entre Claro e Escuro 
       themeMode: themeVM.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.blue, // Cor azul conforme a identidade do Flutter [cite: 81]
+        colorSchemeSeed: Colors.blue, // Cor azul conforme a identidade do Flutter 
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
@@ -57,7 +57,7 @@ class FocusApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.dark,
       ),
-      // Aponta para a sua tela principal [cite: 41, 52]
+      // Aponta para a sua tela principal 
       home: const HomeScreen(), 
     );
   }

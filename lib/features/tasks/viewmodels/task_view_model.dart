@@ -11,14 +11,14 @@ class TaskViewModel extends ChangeNotifier {
 
   TaskViewModel(this._repository);
 
-  // Getters para a UI consumir os dados [cite: 41]
+  // Getters para a UI consumir os dados 
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
 
-  // Carrega as tarefas do banco de dados [cite: 28]
+  // Carrega as tarefas do banco de dados 
   Future<void> fetchTasks() async {
     _isLoading = true;
-    notifyListeners(); // Avisa a UI para mostrar um Spinner [cite: 70]
+    notifyListeners(); // Avisa a UI para mostrar um Spinner 
 
     try {
       _tasks = await _repository.getAllTasks();
@@ -30,19 +30,19 @@ class TaskViewModel extends ChangeNotifier {
     }
   }
 
-  // Adiciona uma nova tarefa [cite: 28]
+  // Adiciona uma nova tarefa 
   Future<void> addTask(Task task) async {
     await _repository.insertTask(task);
     await fetchTasks(); // Atualiza a lista local após salvar
   }
 
-  // Deleta uma tarefa [cite: 28]
+  // Deleta uma tarefa [
   Future<void> removeTask(String id) async {
     await _repository.deleteTask(id);
     await fetchTasks();
   }
 
-  // Alterna o status da tarefa (Check/Uncheck) [cite: 28]
+  // Alterna o status da tarefa (Check/Uncheck) 
   Future<void> toggleTaskStatus(Task task) async {
     final updatedTask = Task(
       id: task.id,
@@ -53,7 +53,7 @@ class TaskViewModel extends ChangeNotifier {
       status: task.status == TaskStatus.done ? TaskStatus.pending : TaskStatus.done,
       categoryId: task.categoryId,
       createdAt: task.createdAt,
-      updatedAt: DateTime.now(), // Atualiza a data de modificação [cite: 92]
+      updatedAt: DateTime.now(), // Atualiza a data de modificação 
     );
     
     await _repository.updateTask(updatedTask);
