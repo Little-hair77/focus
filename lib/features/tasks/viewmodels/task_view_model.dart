@@ -22,11 +22,11 @@ class TaskViewModel extends ChangeNotifier {
       _tasks = await _repository.getAllTasks();
 
       // DEBUG
-      print("--- DEBUG BANCO DE DADOS ---");
+      debugPrint("--- DEBUG BANCO DE DADOS ---");
       for (var task in _tasks) {
         print("Tarefa Salva: ${task.title} | Status: ${task.status}");
       }
-      print("----------------------------");
+      debugPrint("----------------------------");
 
     } catch (e) {
       debugPrint("Erro ao buscar tarefas: $e");
