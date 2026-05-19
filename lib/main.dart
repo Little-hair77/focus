@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:focus/core/theme/app_theme.dart';
 import 'package:focus/features/tasks/views/home.dart';
 import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
 import 'features/tasks/viewmodels/task_view_model.dart';
@@ -47,16 +48,8 @@ class FocusApp extends StatelessWidget {
       title: 'Focus',
       debugShowCheckedModeBanner: false,
       themeMode: themeVM.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-      ),
+      theme: AppTheme.lightTheme,  
+      darkTheme: AppTheme.darkTheme, 
       home: const HomeScreen(),
     );
   }
