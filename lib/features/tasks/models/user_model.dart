@@ -5,7 +5,7 @@ class User {
   final String? photoUrl;
   final DateTime createdAt;
 
-  User({
+  const User({
     required this.id,
     required this.name,
     required this.email,
@@ -13,7 +13,7 @@ class User {
     required this.createdAt,
   });
 
-  // Converte o objeto User para um Map (Necessário para salvar no SQLite/Firebase)
+  // Converter User -> Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -24,14 +24,14 @@ class User {
     };
   }
 
-  // Cria um objeto User a partir de um Map (Vindo do Banco de Dados)
+  // Converter Map -> User
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       photoUrl: map['photo_url'],
-      createdAt: DateTime.parse(map['created_at']),
+      createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),
     );
   }
 }
