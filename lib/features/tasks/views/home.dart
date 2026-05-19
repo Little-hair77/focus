@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
 import '../viewmodels/task_view_model.dart';
+import './task_form_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -60,7 +61,7 @@ class HomeScreen extends StatelessWidget {
             fontSize: 24,
             fontWeight: FontWeight.w900,
             letterSpacing: -1,
-            color: primaryPurple, // Nome estilizado à esquerda
+            color: primaryPurple, 
           ),
         ),
         centerTitle: false, // Força o título para a esquerda
@@ -137,13 +138,15 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: primaryPurple,
+        backgroundColor: Colors.deepPurple,
         onPressed: () {
-          // Futura tela de criação
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TaskFormScreen()),
+          );
         },
-        label: const Text("Nova Tarefa", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        label: const Text("Nova Tarefa", style: TextStyle(color: Colors.white)),
         icon: const Icon(Icons.add, color: Colors.white),
       ),
     );
