@@ -8,6 +8,7 @@ import 'package:focus/features/tasks/views/home.dart';
 import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
 import 'features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/sqlite_task_repository.dart';
+import 'features/tasks/views/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +27,8 @@ void main() async {
       providers: [
         Provider(create: (_) => SQLiteTaskRepository()),
         ChangeNotifierProvider(
-          create: (context) => TaskViewModel(
-            context.read<SQLiteTaskRepository>(),
-          )..fetchTasks(),
+          create: (context) =>
+              TaskViewModel(context.read<SQLiteTaskRepository>())..fetchTasks(),
         ),
         ChangeNotifierProvider.value(value: themeViewModel),
       ],
@@ -48,8 +48,11 @@ class FocusApp extends StatelessWidget {
       title: 'Focus',
       debugShowCheckedModeBanner: false,
       themeMode: themeVM.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: AppTheme.lightTheme,  
-      darkTheme: AppTheme.darkTheme, 
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+
+      routes: {'/login': (context) => LoginPage()},
+
       home: const HomeScreen(),
     );
   }
