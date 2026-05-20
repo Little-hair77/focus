@@ -8,7 +8,8 @@ import 'package:focus/features/tasks/views/home.dart';
 import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
 import 'features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/sqlite_task_repository.dart';
-import 'features/tasks/views/login.dart';
+import 'package:focus/features/tasks/views/login.dart';
+import 'package:focus/features/tasks/views/register.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +52,10 @@ class FocusApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
 
-      routes: {'/login': (context) => LoginPage()},
+      routes: {
+        '/register': (context) => RegisterPage(),
+        '/login': (context) => LoginPage(),
+      },
 
       home: const HomeScreen(),
     );

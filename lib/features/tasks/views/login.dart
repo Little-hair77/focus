@@ -16,7 +16,11 @@ class _LoginPageState extends State<LoginPage> {
   bool obscurePassword = true;
 
   // Estilo dos campos seguindo os Design Tokens roxos do projeto Focus
-  InputDecoration _inputStyle(BuildContext context, String label, IconData icon) {
+  InputDecoration _inputStyle(
+    BuildContext context,
+    String label,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
@@ -31,7 +35,10 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
       ),
-      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+      floatingLabelStyle: TextStyle(
+        color: theme.colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
@@ -45,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Login realizado com sucesso 🚀')),
     );
-    
+
     Navigator.pushReplacementNamed(context, '/home');
   }
 
@@ -53,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Se a largura for maior que 800px, dividimos a teça é dividida
     final isDesktop = screenWidth > 800;
 
@@ -71,7 +78,11 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.task_alt, size: 120, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.task_alt,
+                        size: 120,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(height: 24),
                       Text(
                         'Focus',
@@ -84,7 +95,9 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         'Centralize seus objetivos, maximize seus resultados.',
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
@@ -97,7 +110,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Center(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                    vertical: 24.0,
+                  ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 400),
                     child: Form(
@@ -108,23 +124,34 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           // Se for celular, a logo e os textos aparecem em cima do form
                           if (!isDesktop) ...[
-                            Icon(Icons.task_alt, size: 80, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.task_alt,
+                              size: 80,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               'Focus',
-                              style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w900),
+                              style: theme.textTheme.headlineLarge?.copyWith(
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                             const SizedBox(height: 8),
-                            Text('Organize suas tarefas com clareza', style: theme.textTheme.bodyMedium),
+                            Text(
+                              'Organize suas tarefas com clareza',
+                              style: theme.textTheme.bodyMedium,
+                            ),
                             const SizedBox(height: 40),
                           ],
-                          
+
                           if (isDesktop) ...[
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 'Boas-vindas de volta!',
-                                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 32),
@@ -134,29 +161,47 @@ class _LoginPageState extends State<LoginPage> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: _inputStyle(context, 'Email', Icons.email_outlined),
+                            decoration: _inputStyle(
+                              context,
+                              'Email',
+                              Icons.email_outlined,
+                            ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) return 'Digite seu email';
+                              if (value == null || value.isEmpty)
+                                return 'Digite seu email';
                               if (!value.contains('@')) return 'Email inválido';
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
 
                           // Input de Senha
                           TextFormField(
                             controller: _senhaController,
                             obscureText: obscurePassword,
-                            decoration: _inputStyle(context, 'Senha', Icons.lock_outline_rounded).copyWith(
-                              suffixIcon: IconButton(
-                                icon: Icon(obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                                onPressed: () => setState(() => obscurePassword = !obscurePassword),
-                              ),
-                            ),
+                            decoration:
+                                _inputStyle(
+                                  context,
+                                  'Senha',
+                                  Icons.lock_outline_rounded,
+                                ).copyWith(
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () => setState(
+                                      () => obscurePassword = !obscurePassword,
+                                    ),
+                                  ),
+                                ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) return 'Digite sua senha';
-                              if (value.length < 6) return 'A senha deve ter no mínimo 6 caracteres';
+                              if (value == null || value.isEmpty)
+                                return 'Digite sua senha';
+                              if (value.length < 6)
+                                return 'A senha deve ter no mínimo 6 caracteres';
                               return null;
                             },
                           ),
@@ -170,7 +215,10 @@ class _LoginPageState extends State<LoginPage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               gradient: LinearGradient(
-                                colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.8)],
+                                colors: [
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.primary.withOpacity(0.8),
+                                ],
                               ),
                             ),
                             child: ElevatedButton(
@@ -178,13 +226,21 @@ class _LoginPageState extends State<LoginPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
                               ),
                               child: loading
-                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
                                   : const Text(
-                                      'ENTRAR', 
-                                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.2)
+                                      'ENTRAR',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
                                     ),
                             ),
                           ),
@@ -192,10 +248,15 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 24),
 
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/register');
+                            },
                             child: Text(
                               'Não tem uma conta? Criar conta',
-                              style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
