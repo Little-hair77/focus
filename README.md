@@ -1,6 +1,6 @@
 # focus
 
-## 🎨 Design Tokens (Sprint 3)
+## 🎨 Design Tokens 
 
 O projeto **Focus** adota um sistema de Design Tokens para garantir a consistência de componentes, espaçamentos e acessibilidade visual entre os modos claro e escuro.
 
