@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
 import '../viewmodels/task_view_model.dart';
+import './task_detail_screen.dart';
 import './task_form_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -174,6 +175,14 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TaskDetailScreen(task: task),
+            ),
+          );
+        },
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         title: Text(
           task.title,
