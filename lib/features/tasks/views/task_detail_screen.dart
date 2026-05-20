@@ -62,8 +62,8 @@ class TaskDetailScreen extends StatelessWidget {
       ),
       body: Center(
         child: ConstrainedBox(
-          // Mantém o mesmo padrão responsivo do formulário: centralizado e sem esticar no desktop.
-          constraints: const BoxConstraints(maxWidth: 500),
+          // Em telas largas, o card ganha mais espaço sem ocupar a tela inteira.
+          constraints: const BoxConstraints(maxWidth: 720),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(
@@ -104,32 +104,50 @@ class TaskDetailScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
-                  _buildInfoRow(
-                    Icons.flag_rounded,
-                    'Prioridade',
-                    priorityLabel,
-                    theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    Icons.check_circle_rounded,
-                    'Status',
-                    statusLabel,
-                    theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    Icons.calendar_today_rounded,
-                    'Vencimento',
-                    dueDate,
-                    theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    Icons.history_rounded,
-                    'Criada em',
-                    DateFormat('dd/MM/yyyy HH:mm').format(task.createdAt),
-                    theme,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final itemWidth = constraints.maxWidth > 520
+                          ? (constraints.maxWidth - 16) / 2
+                          : constraints.maxWidth;
+
+                      // Wrap mantém uma coluna no mobile e duas colunas quando o card tem espaço.
+                      return Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        children: [
+                          _buildInfoRow(
+                            Icons.flag_rounded,
+                            'Prioridade',
+                            priorityLabel,
+                            theme,
+                            itemWidth,
+                          ),
+                          _buildInfoRow(
+                            Icons.check_circle_rounded,
+                            'Status',
+                            statusLabel,
+                            theme,
+                            itemWidth,
+                          ),
+                          _buildInfoRow(
+                            Icons.calendar_today_rounded,
+                            'Vencimento',
+                            dueDate,
+                            theme,
+                            itemWidth,
+                          ),
+                          _buildInfoRow(
+                            Icons.history_rounded,
+                            'Criada em',
+                            DateFormat(
+                              'dd/MM/yyyy HH:mm',
+                            ).format(task.createdAt),
+                            theme,
+                            itemWidth,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -145,22 +163,26 @@ class TaskDetailScreen extends StatelessWidget {
     String label,
     String value,
     ThemeData theme,
+    double width,
   ) {
-    return Row(
-      children: [
-        Icon(icon, color: theme.colorScheme.primary),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            '$label: $value',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.textTheme.bodyMedium?.color,
+    return SizedBox(
+      width: width,
+      child: Row(
+        children: [
+          Icon(icon, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '$label: $value',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: theme.textTheme.bodyMedium?.color,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
