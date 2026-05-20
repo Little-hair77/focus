@@ -20,27 +20,28 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   TaskPriority _selectedPriority = TaskPriority.medium;
   String? _selectedCategoryId;
 
-  // Estilo dos campos
-  InputDecoration _inputStyle(String label, IconData icon) {
+  // Estilo dos campos adaptado para usar o Tema Centralizado dinâmico
+  InputDecoration _inputStyle(BuildContext context, String label, IconData icon) {
+    final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.deepPurple.withOpacity(0.7)),
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary.withOpacity(0.7)),
       filled: true,
-      fillColor: Colors.deepPurple.withOpacity(0.05),
+      fillColor: theme.colorScheme.primary.withOpacity(0.05),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.deepPurple, width: 1.5),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
       ),
-      floatingLabelStyle: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
     );
   }
 
-  // Função para abrir o seletor de data
   Future<void> _pickDate() async {
+    final theme = Theme.of(context);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -49,7 +50,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Colors.deepPurple),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: theme.colorScheme.primary,
+              brightness: theme.brightness,
+            ),
           ),
           child: child!,
         );
@@ -72,7 +76,6 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         categoryId: _selectedCategoryId,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        // PhotoPath, Latitude e Longitude podem ser adicionados em Sprints futuros
       );
 
       taskVM.addTask(newTask);
@@ -82,115 +85,143 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Define se a tela atual é considerada larga (Tablets ou Computador/Web)
+    final isWideScreen = screenWidth > 600;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Novo Foco"),
-        titleTextStyle: const TextStyle(color: Colors.deepPurple, fontSize: 20, fontWeight: FontWeight.w900),
+        titleTextStyle: TextStyle(
+          color: theme.colorScheme.primary, 
+          fontSize: 20, 
+          fontWeight: FontWeight.w900
+        ),
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.deepPurple, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.primary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Defina seu próximo objetivo",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-              ),
-              const SizedBox(height: 24),
-              
-              TextFormField(
-                controller: _titleController,
-                decoration: _inputStyle('O que você vai fazer?', Icons.edit_note_rounded),
-                validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              TextFormField(
-                controller: _descController,
-                maxLines: 3,
-                decoration: _inputStyle('Detalhes adicionais', Icons.notes_rounded),
-              ),
-              
-              const SizedBox(height: 24),
-
-              // Campo de Data (DueDate)
-              InkWell(
-                onTap: _pickDate,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16),
+      // Centraliza o formulário em telas grandes
+      body: Center(
+        child: ConstrainedBox(
+          // Se for tela larga, limita a largura em 500px para o design não quebrar ou esticar.
+          constraints: BoxConstraints(maxWidth: isWideScreen ? 500 : double.infinity),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Defina seu próximo objetivo",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today_rounded, color: Colors.deepPurple),
-                      const SizedBox(width: 12),
-                      Text(
-                        _selectedDate == null 
-                          ? 'Quando vence?' 
-                          : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
-                        style: TextStyle(
-                          color: _selectedDate == null ? Colors.grey[700] : Colors.deepPurple,
-                          fontWeight: _selectedDate == null ? FontWeight.normal : FontWeight.bold
+                  const SizedBox(height: 24),
+                  
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: _inputStyle(context, 'O que você vai fazer?', Icons.edit_note_rounded),
+                    validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  TextFormField(
+                    controller: _descController,
+                    maxLines: 3,
+                    decoration: _inputStyle(context, 'Detalhes adicionais', Icons.notes_rounded),
+                  ),
+                  
+                  const SizedBox(height: 24),
+
+                  // Campo de Data (DueDate) Adaptativo
+                  InkWell(
+                    onTap: _pickDate,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded, color: theme.colorScheme.primary),
+                          const SizedBox(width: 12),
+                          Text(
+                            _selectedDate == null 
+                              ? 'Quando vence?' 
+                              : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
+                            style: TextStyle(
+                              color: _selectedDate == null ? Colors.grey[600] : theme.colorScheme.primary,
+                              fontWeight: _selectedDate == null ? FontWeight.normal : FontWeight.bold
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  
+                  const Text("Prioridade", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<TaskPriority>(
+                      style: SegmentedButton.styleFrom(
+                        selectedBackgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                        selectedForegroundColor: theme.colorScheme.primary,
+                      ),
+                      segments: const [
+                        ButtonSegment(value: TaskPriority.low, label: Text("Baixa")),
+                        ButtonSegment(value: TaskPriority.medium, label: Text("Média")),
+                        ButtonSegment(value: TaskPriority.high, label: Text("Alta")),
+                      ],
+                      selected: {_selectedPriority},
+                      onSelectionChanged: (Set<TaskPriority> newSelection) {
+                        setState(() => _selectedPriority = newSelection.first);
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+                  
+                  // Botão de Salvar Responsivo e com Cores do Tema
+                  Center(
+                    child: Container(
+                      width: isWideScreen ? 350 : double.infinity, // Trava o tamanho se a tela for web/tablet
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [theme.colorScheme.primary, theme.colorScheme.secondary.withOpacity(0.8)],
                         ),
                       ),
-                    ],
+                      child: ElevatedButton(
+                        onPressed: _saveTask,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: const Text(
+                          "CRIAR TAREFA", 
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-
-              const SizedBox(height: 24),
-              
-              const Text("Prioridade", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<TaskPriority>(
-                  segments: const [
-                    ButtonSegment(value: TaskPriority.low, label: Text("Baixa")),
-                    ButtonSegment(value: TaskPriority.medium, label: Text("Média")),
-                    ButtonSegment(value: TaskPriority.high, label: Text("Alta")),
-                  ],
-                  selected: {_selectedPriority},
-                  onSelectionChanged: (Set<TaskPriority> newSelection) {
-                    setState(() => _selectedPriority = newSelection.first);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 40),
-              
-              // Botão de Salvar
-              Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(colors: [Colors.deepPurple, Color(0xFF673AB7)]),
-                ),
-                child: ElevatedButton(
-                  onPressed: _saveTask,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text("CRIAR TAREFA", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
