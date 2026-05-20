@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus/features/tasks/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -32,6 +33,7 @@ void main() async {
               TaskViewModel(context.read<SQLiteTaskRepository>())..fetchTasks(),
         ),
         ChangeNotifierProvider.value(value: themeViewModel),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
       ],
       child: const FocusApp(),
     ),

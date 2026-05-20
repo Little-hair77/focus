@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:focus/features/tasks/viewmodels/auth_view_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,10 +14,8 @@ class _LoginPageState extends State<LoginPage> {
   final _senhaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool loading = false;
   bool obscurePassword = true;
 
-  // Estilo dos campos seguindo os Design Tokens roxos do projeto Focus
   InputDecoration _inputStyle(
     BuildContext context,
     String label,
@@ -42,26 +42,31 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> fazerLogin() async {
+  Future<void> _efetuarLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => loading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() => loading = false);
+    final authVM = context.read<AuthViewModel>();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login realizado com sucesso 🚀')),
+    final sucesso = await authVM.login(
+      _emailController.text,
+      _senhaController.text,
     );
 
-    Navigator.pushReplacementNamed(context, '/home');
+    if (sucesso && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login realizado com sucesso 🚀')),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authVM = context.watch<AuthViewModel>(); // Escutando as mudanças de estado do AuthViewModel
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Se a largura for maior que 800px, dividimos a teça é dividida
+    // Se a largura for maior que 800px, a tela é dividida
     final isDesktop = screenWidth > 800;
 
     return Scaffold(
@@ -122,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Se for celular, a logo e os textos aparecem em cima do form
+                          
                           if (!isDesktop) ...[
                             Icon(
                               Icons.task_alt,
@@ -167,8 +172,9 @@ class _LoginPageState extends State<LoginPage> {
                               Icons.email_outlined,
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Digite seu email';
+                              }
                               if (!value.contains('@')) return 'Email inválido';
                               return null;
                             },
@@ -198,17 +204,18 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Digite sua senha';
-                              if (value.length < 6)
+                              }
+                              if (value.length < 6) {
                                 return 'A senha deve ter no mínimo 6 caracteres';
+                              }
                               return null;
                             },
                           ),
 
                           const SizedBox(height: 32),
 
-                          // Botão de Entrada
                           Container(
                             width: double.infinity,
                             height: 56,
@@ -222,7 +229,8 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             child: ElevatedButton(
-                              onPressed: loading ? null : fazerLogin,
+                              // Agora o botão desabilita usando o estado de loading vindo do ViewModel
+                              onPressed: authVM.isLoading ? null : _efetuarLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
@@ -230,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: loading
+                              child: authVM.isLoading
                                   ? const CircularProgressIndicator(
                                       color: Colors.white,
                                     )

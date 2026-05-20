@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:focus/features/tasks/viewmodels/auth_view_model.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,42 +13,67 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
-
-  bool loading = false;
   bool obscurePassword = true;
 
-  Future<void> cadastrar() async {
+  InputDecoration _inputStyle(BuildContext context, String label, IconData icon) {
+    final theme = Theme.of(context);
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary.withOpacity(0.7)),
+      filled: true,
+      fillColor: theme.colorScheme.primary.withOpacity(0.05),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+      ),
+      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Future<void> _efetuarCadastro() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      loading = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      loading = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Conta criada com sucesso 🚀')),
+    final authVM = context.read<AuthViewModel>();
+    
+    final sucesso = await authVM.register(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
     );
 
-    Navigator.pop(context);
+    if (sucesso && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta criada com sucesso 🚀')),
+      );
+      // Redireciona direto para a Home, limpando a pilha de telas
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authVM = context.watch<AuthViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Cadastro")),
-
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.primary),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -54,119 +81,65 @@ class _RegisterPageState extends State<RegisterPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.person_add,
-                      size: 90,
-                      color: theme.colorScheme.primary,
-                    ),
-
+                    Icon(Icons.person_add_rounded, size: 90, color: theme.colorScheme.primary),
                     const SizedBox(height: 20),
-
                     Text(
                       'Criar Conta',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
-
                     const SizedBox(height: 40),
-
-                    // NOME
+                    
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nome',
-                        prefixIcon: Icon(Icons.person),
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Digite seu nome';
-                        }
-                        return null;
-                      },
+                      decoration: _inputStyle(context, 'Nome', Icons.person_outline),
+                      validator: (value) => value == null || value.isEmpty ? 'Digite seu nome' : null,
                     ),
-
                     const SizedBox(height: 20),
-
-                    // EMAIL
+                    
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email),
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: _inputStyle(context, 'Email', Icons.email_outlined),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Digite seu email';
-                        }
-
-                        if (!value.contains('@')) {
-                          return 'Email inválido';
-                        }
-
+                        if (value == null || value.isEmpty) return 'Digite seu email';
+                        if (!value.contains('@')) return 'Email inválido';
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 20),
-
-                    // SENHA
+                    
                     TextFormField(
                       controller: _passwordController,
                       obscureText: obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        prefixIcon: const Icon(Icons.lock),
-                        border: const OutlineInputBorder(),
+                      decoration: _inputStyle(context, 'Senha', Icons.lock_outline_rounded).copyWith(
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
+                          icon: Icon(obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                          onPressed: () => setState(() => obscurePassword = !obscurePassword),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Digite sua senha';
-                        }
-
-                        if (value.length < 6) {
-                          return 'Senha muito curta';
-                        }
-
-                        return null;
-                      },
+                      validator: (value) => value == null || value.isEmpty || value.length < 6 
+                          ? 'A senha deve ter no mínimo 6 caracteres' : null,
                     ),
-
-                    const SizedBox(height: 30),
-
-                    SizedBox(
+                    const SizedBox(height: 32),
+                    
+                    Container(
                       width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: loading ? null : cadastrar,
-                        child: loading
-                            ? const CircularProgressIndicator()
-                            : const Text('Cadastrar'),
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.8)]),
                       ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Já tenho conta'),
+                      child: ElevatedButton(
+                        onPressed: authVM.isLoading ? null : _efetuarCadastro,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: authVM.isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('CADASTRAR', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
                     ),
                   ],
                 ),
