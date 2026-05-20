@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:focus/features/tasks/viewmodels/auth_view_model.dart';
+import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

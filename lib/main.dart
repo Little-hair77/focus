@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:focus/features/tasks/viewmodels/auth_view_model.dart';
+import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:focus/core/theme/app_theme.dart';
 import 'package:focus/features/tasks/views/home.dart';
-import 'package:focus/features/tasks/viewmodels/theme_view_model.dart';
-import 'features/tasks/viewmodels/task_view_model.dart';
+import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
+import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/sqlite_task_repository.dart';
-import 'package:focus/features/tasks/views/login.dart';
-import 'package:focus/features/tasks/views/register.dart';
+import 'package:focus/features/auth/views/login.dart';
+import 'package:focus/features/auth/views/register.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +57,7 @@ class FocusApp extends StatelessWidget {
       routes: {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
+        '/home': (context) => HomeScreen(),
       },
 
       home: const HomeScreen(),

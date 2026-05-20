@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:focus/features/settings/settings_service.dart';
+import 'package:focus/features/settings/services/settings_service.dart';
 
 class ThemeViewModel extends ChangeNotifier {
   final SettingsService _service = SettingsService();
