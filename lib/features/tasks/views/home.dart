@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
+import 'package:focus/shared/widgets/app_drawer.dart';
+import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import '../viewmodels/task_view_model.dart';
 import './task_detail_screen.dart';
 import './task_form_screen.dart';
@@ -12,10 +13,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeVM = context.watch<ThemeViewModel>();
     final taskVM = context.watch<TaskViewModel>();
     final theme = Theme.of(context);
-    final isDark = themeVM.isDarkMode;
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 600;
@@ -23,50 +22,17 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
 
-      drawer: Drawer(
-        child: Column(
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: theme.colorScheme.primary),
-              accountName: const Text(
-                "Pablo Henrique",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              accountEmail: const Text("Desenvolvedor"),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: theme.colorScheme.onPrimary,
-                child: Text(
-                  "P",
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-              title: Text(isDark ? "Modo Claro" : "Modo Noturno"),
-              trailing: Switch(
-                value: isDark,
-                onChanged: (value) => themeVM.toggleTheme(),
-                activeThumbColor: theme.colorScheme.primary,
-              ),
-            ),
-            const Spacer(),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                "Focus App v1.0",
-                style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: const AppDrawer(),
 
       appBar: const AppBarWidget(),
+      bottomNavigationBar: AppBottomNavigationBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+        },
+      ),
 
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
