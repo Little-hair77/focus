@@ -18,8 +18,8 @@ class AuthViewModel extends ChangeNotifier {
 
     // Validação fictícia de sucesso
     _isLoggedIn = true;
-    _userName = "Pablo Henrique"; 
-    
+    _userName = "Pablo Henrique";
+
     _isLoading = false;
     notifyListeners();
     return true;

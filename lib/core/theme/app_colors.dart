@@ -12,7 +12,9 @@ class AppColors {
 
   static const Color onPrimary = Colors.white;
   static const Color textHighEmphasis = Colors.black87;
+  static const Color darkTextHighEmphasis = Color(0xFFEDE7F6);
   static const Color textMediumEmphasis = Color(0xFF757575);
+  static const Color darkTextMediumEmphasis = Color(0xFFB8AEC9);
   static const Color textMuted = Colors.grey;
 
   static const Color shadow = Colors.black;

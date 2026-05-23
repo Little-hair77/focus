@@ -6,10 +6,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        brightness: Brightness.light,
-      ).copyWith(primary: AppColors.primary, secondary: AppColors.secondary),
+      colorSchemeSeed: AppColors.primary,
       scaffoldBackgroundColor: AppColors.lightBackground,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.transparent,

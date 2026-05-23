@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:focus/core/theme/app_theme.dart';
+import 'package:focus/features/tasks/views/dashboard_screen.dart';
 import 'package:focus/features/tasks/views/home.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
@@ -57,10 +58,11 @@ class FocusApp extends StatelessWidget {
       routes: {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
-        '/home': (context) => HomeScreen(),
+        '/home': (context) => const DashboardScreen(),
+        '/tasks': (context) => const HomeScreen(),
       },
 
-      home: const HomeScreen(),
+      home: const DashboardScreen(),
     );
   }
 }
