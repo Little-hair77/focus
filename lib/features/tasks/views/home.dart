@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import '../viewmodels/task_view_model.dart';
@@ -35,7 +37,11 @@ class HomeScreen extends StatelessWidget {
                 backgroundColor: theme.colorScheme.onPrimary,
                 child: Text(
                   "P",
-                  style: TextStyle(fontSize: 24, color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -45,7 +51,7 @@ class HomeScreen extends StatelessWidget {
               trailing: Switch(
                 value: isDark,
                 onChanged: (value) => themeVM.toggleTheme(),
-                activeColor: theme.colorScheme.primary,
+                activeThumbColor: theme.colorScheme.primary,
               ),
             ),
             const Spacer(),
@@ -53,37 +59,14 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(16.0),
               child: Text(
                 "Focus App v1.0",
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12),
               ),
             ),
           ],
         ),
       ),
 
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        iconTheme: IconThemeData(color: theme.colorScheme.primary),
-        title: Text(
-          'Focus',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.login),
-            tooltip: 'Login',
-            onPressed: () {
-              Navigator.pushNamed(context, '/login');
-            },
-          ),
-        ],
-      ),
+      appBar: const AppBarWidget(),
 
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -103,40 +86,48 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               child: taskVM.isLoading
                   ? Center(
-                      child: CircularProgressIndicator(color: theme.colorScheme.primary),
+                      child: CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
+                      ),
                     )
                   : taskVM.tasks.isEmpty
-                      ? _buildEmptyState()
-                      : Center( // Evita que a grid passe de 1200px em telas Ultra-wide
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1200),
-                            // SELETOR DE LAYOUT RESPONSIVO: Grid para telas largas, Lista para celulares
-                            child: isWideScreen 
-                                ? GridView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: screenWidth > 900 ? 3 : 2, // 3 colunas no PC, 2 no Tablet
+                  ? _buildEmptyState()
+                  : Center(
+                      // Evita que a grid passe de 1200px em telas Ultra-wide
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        // SELETOR DE LAYOUT RESPONSIVO: Grid para telas largas, Lista para celulares
+                        child: isWideScreen
+                            ? GridView.builder(
+                                physics: const BouncingScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: screenWidth > 900
+                                          ? 3
+                                          : 2, // 3 colunas no PC, 2 no Tablet
                                       crossAxisSpacing: 16,
                                       mainAxisSpacing: 16,
-                                      mainAxisExtent: 100, // Altura travada do card
+                                      mainAxisExtent:
+                                          100, // Altura travada do card
                                     ),
-                                    itemCount: taskVM.tasks.length,
-                                    itemBuilder: (context, index) {
-                                      final task = taskVM.tasks[index];
-                                      return _buildTaskCard(context, task, taskVM);
-                                    },
-                                  )
-                                : ListView.separated(
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: taskVM.tasks.length,
-                                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                                    itemBuilder: (context, index) {
-                                      final task = taskVM.tasks[index];
-                                      return _buildTaskCard(context, task, taskVM);
-                                    },
-                                  ),
-                          ),
-                        ),
+                                itemCount: taskVM.tasks.length,
+                                itemBuilder: (context, index) {
+                                  final task = taskVM.tasks[index];
+                                  return _buildTaskCard(context, task, taskVM);
+                                },
+                              )
+                            : ListView.separated(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: taskVM.tasks.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 12),
+                                itemBuilder: (context, index) {
+                                  final task = taskVM.tasks[index];
+                                  return _buildTaskCard(context, task, taskVM);
+                                },
+                              ),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -149,8 +140,14 @@ class HomeScreen extends StatelessWidget {
             MaterialPageRoute(builder: (context) => const TaskFormScreen()),
           );
         },
-        label: const Text("Nova Tarefa", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          "Nova Tarefa",
+          style: TextStyle(
+            color: AppColors.onPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        icon: const Icon(Icons.add, color: AppColors.onPrimary),
       ),
     );
   }
@@ -163,12 +160,12 @@ class HomeScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
-            ? const Color(0xFF1E1E1E)
-            : Colors.white,
+            ? AppColors.darkSurface
+            : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.shadow.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -190,22 +187,26 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
             decoration: isDone ? TextDecoration.lineThrough : null,
             color: isDone
-                ? Colors.grey
-                : (theme.brightness == Brightness.dark ? Colors.white : Colors.black87),
+                ? AppColors.textMuted
+                : (theme.brightness == Brightness.dark
+                      ? AppColors.onPrimary
+                      : AppColors.textHighEmphasis),
           ),
         ),
         subtitle: Text(
           task.description ?? 'Sem descrição',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
+          style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
         ),
         trailing: Transform.scale(
           scale: 1.1,
           child: Checkbox(
             value: isDone,
             activeColor: theme.colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (value) => taskVM.toggleTaskStatus(task),
           ),
         ),
@@ -221,13 +222,13 @@ class HomeScreen extends StatelessWidget {
           Icon(
             Icons.assignment_turned_in_outlined,
             size: 80,
-            color: Colors.grey.withOpacity(0.5),
+            color: AppColors.textMuted.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           const Text(
             'Tudo limpo por aqui!\nQue tal focar em algo novo?',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 16),
           ),
         ],
       ),
