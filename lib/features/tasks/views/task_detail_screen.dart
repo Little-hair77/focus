@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:focus/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
+import 'package:focus/shared/widgets/app_bar.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
@@ -42,25 +44,18 @@ class TaskDetailScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text("Detalhes da Tarefa"),
-        titleTextStyle: TextStyle(
-          color: theme.colorScheme.primary,
-          fontSize: 20,
-          fontWeight: FontWeight.w900,
-        ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
+      appBar: AppBarWidget(
         leading: IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: theme.colorScheme.primary,
+            color: AppColors.onPrimary,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
           // Em telas largas, o card ganha mais espaço sem ocupar a tela inteira.
           constraints: const BoxConstraints(maxWidth: 720),
@@ -70,87 +65,108 @@ class TaskDetailScreen extends StatelessWidget {
               horizontal: 24.0,
               vertical: 16.0,
             ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                // Replica o contraste dos cards da Home nos modos claro e escuro.
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Detalhes da tarefa ${task.title}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.titleLarge?.color,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    // Replica o contraste dos cards da Home nos modos claro e escuro.
+                    color: isDark
+                        ? AppColors.darkSurface
+                        : AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadow.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    task.description?.isNotEmpty == true
-                        ? task.description!
-                        : 'Sem descrição',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final itemWidth = constraints.maxWidth > 520
-                          ? (constraints.maxWidth - 16) / 2
-                          : constraints.maxWidth;
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? AppColors.onPrimary
+                              : AppColors.textHighEmphasis,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        task.description?.isNotEmpty == true
+                            ? task.description!
+                            : 'Sem descrição',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final itemWidth = constraints.maxWidth > 520
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth;
 
-                      // Wrap mantém uma coluna no mobile e duas colunas quando o card tem espaço.
-                      return Wrap(
-                        spacing: 16,
-                        runSpacing: 16,
-                        children: [
-                          _buildInfoRow(
-                            Icons.flag_rounded,
-                            'Prioridade',
-                            priorityLabel,
-                            theme,
-                            itemWidth,
-                          ),
-                          _buildInfoRow(
-                            Icons.check_circle_rounded,
-                            'Status',
-                            statusLabel,
-                            theme,
-                            itemWidth,
-                          ),
-                          _buildInfoRow(
-                            Icons.calendar_today_rounded,
-                            'Vencimento',
-                            dueDate,
-                            theme,
-                            itemWidth,
-                          ),
-                          _buildInfoRow(
-                            Icons.history_rounded,
-                            'Criada em',
-                            DateFormat(
-                              'dd/MM/yyyy HH:mm',
-                            ).format(task.createdAt),
-                            theme,
-                            itemWidth,
-                          ),
-                        ],
-                      );
-                    },
+                          // Wrap mantém uma coluna no mobile e duas colunas quando o card tem espaço.
+                          return Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            children: [
+                              _buildInfoRow(
+                                Icons.flag_rounded,
+                                'Prioridade',
+                                priorityLabel,
+                                theme,
+                                itemWidth,
+                              ),
+                              _buildInfoRow(
+                                Icons.check_circle_rounded,
+                                'Status',
+                                statusLabel,
+                                theme,
+                                itemWidth,
+                              ),
+                              _buildInfoRow(
+                                Icons.calendar_today_rounded,
+                                'Vencimento',
+                                dueDate,
+                                theme,
+                                itemWidth,
+                              ),
+                              _buildInfoRow(
+                                Icons.history_rounded,
+                                'Criada em',
+                                DateFormat(
+                                  'dd/MM/yyyy HH:mm',
+                                ).format(task.createdAt),
+                                theme,
+                                itemWidth,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

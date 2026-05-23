@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
@@ -24,9 +25,12 @@ class _LoginPageState extends State<LoginPage> {
     final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: theme.colorScheme.primary.withOpacity(0.7)),
+      prefixIcon: Icon(
+        icon,
+        color: theme.colorScheme.primary.withValues(alpha: 0.7),
+      ),
       filled: true,
-      fillColor: theme.colorScheme.primary.withOpacity(0.05),
+      fillColor: theme.colorScheme.primary.withValues(alpha: 0.05),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
@@ -63,7 +67,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authVM = context.watch<AuthViewModel>(); // Escutando as mudanças de estado do AuthViewModel
+    final authVM = context
+        .watch<
+          AuthViewModel
+        >(); // Escutando as mudanças de estado do AuthViewModel
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Se a largura for maior que 800px, a tela é dividida
@@ -79,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: theme.colorScheme.primary.withOpacity(0.05),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -101,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                         'Centralize seus objetivos, maximize seus resultados.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.textMediumEmphasis,
                         ),
                       ),
                     ],
@@ -127,7 +134,6 @@ class _LoginPageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          
                           if (!isDesktop) ...[
                             Icon(
                               Icons.task_alt,
@@ -224,28 +230,32 @@ class _LoginPageState extends State<LoginPage> {
                               gradient: LinearGradient(
                                 colors: [
                                   theme.colorScheme.primary,
-                                  theme.colorScheme.primary.withOpacity(0.8),
+                                  theme.colorScheme.primary.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ],
                               ),
                             ),
                             child: ElevatedButton(
                               // Agora o botão desabilita usando o estado de loading vindo do ViewModel
-                              onPressed: authVM.isLoading ? null : _efetuarLogin,
+                              onPressed: authVM.isLoading
+                                  ? null
+                                  : _efetuarLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
+                                backgroundColor: AppColors.transparent,
+                                shadowColor: AppColors.transparent,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
                               child: authVM.isLoading
                                   ? const CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: AppColors.onPrimary,
                                     )
                                   : const Text(
                                       'ENTRAR',
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.onPrimary,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1.2,
                                       ),
