@@ -61,7 +61,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta criada com sucesso 🚀')),
       );
-      // Redireciona direto para a Home, limpando a pilha de telas
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
@@ -95,10 +94,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.person_add_rounded,
-                      size: 90,
-                      color: theme.colorScheme.primary,
+                    Image.asset(
+                      'assets/images/focusLogo.png',
+                      width: 500,
+                      fit: BoxFit.contain,
+                    ),
+                    Text(
+                      'Organize suas tarefas com clareza',
+                      style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 20),
                     Text(
