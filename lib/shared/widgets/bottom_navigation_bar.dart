@@ -29,7 +29,7 @@ class AppBottomNavigationBar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard_rounded),
-          label: 'Dashboard',
+          label: 'Dados',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.checklist_rounded),

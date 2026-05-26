@@ -6,12 +6,18 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorSchemeSeed: AppColors.primary,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.primary,       
+        secondary: AppColors.secondary,   
+        surface: AppColors.lightSurface,
+        inverseSurface: AppColors.darkSurface,
+      ),
+      
       scaffoldBackgroundColor: AppColors.lightBackground,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: AppColors.primary),
+        iconTheme: IconThemeData(color: AppColors.primary), // Segue o token principal
       ),
     );
   }
@@ -20,14 +26,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme:
-          ColorScheme.fromSeed(
-            seedColor: AppColors.darkPrimary,
-            brightness: Brightness.dark,
-          ).copyWith(
-            primary: AppColors.darkPrimary,
-            secondary: AppColors.darkPrimary,
-          ),
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.darkPrimary,
+        secondary: AppColors.secondary,
+        surface: AppColors.darkSurface,
+      ),
+      
       scaffoldBackgroundColor: AppColors.darkBackground,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.transparent,

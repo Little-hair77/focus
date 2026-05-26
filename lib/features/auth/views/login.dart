@@ -67,13 +67,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authVM = context
-        .watch<
-          AuthViewModel
-        >(); // Escutando as mudanças de estado do AuthViewModel
+    final authVM = context.watch<AuthViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Se a largura for maior que 800px, a tela é dividida
     final isDesktop = screenWidth > 800;
 
     return Scaffold(
@@ -81,34 +76,29 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Row(
           children: [
-            // COLUNA DA ESQUERDA: Só aparece em telas grandes (Computador/Tablet largo)
+            // COLUNA DA ESQUERDA: Só aparece em telas grandes (Desktop)
             if (isDesktop)
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                  color: theme.colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.task_alt,
-                        size: 120,
-                        color: theme.colorScheme.primary,
+                      Image.asset(
+                        'assets/images/focusLogo2.png',
+                        width: 500,
+                        height: 500,
+                        fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Focus',
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8), 
                       Text(
                         'Centralize seus objetivos, maximize seus resultados.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.textMediumEmphasis,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -116,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-            // COLUNA DA DIREITA: O formulário de Login (Aparece em todos os dispositivos)
+            // COLUNA DA DIREITA: Formulário de Login (Mobile e Desktop)
             Expanded(
               flex: 1,
               child: Center(
@@ -135,24 +125,23 @@ class _LoginPageState extends State<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (!isDesktop) ...[
-                            Icon(
-                              Icons.task_alt,
-                              size: 80,
-                              color: theme.colorScheme.primary,
+                            Image.asset(
+                              'assets/images/focusLogo.png',
+                              width: 500,
+                              fit: BoxFit.contain,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Focus',
-                              style: theme.textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.w900,
+                            // O texto agora usa uma transformação leve para subir e anular o padding da imagem
+                            Transform.translate(
+                              offset: const Offset(0, -10),
+                              child: Text(
+                                'Organize suas tarefas com clareza',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textMediumEmphasis,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Organize suas tarefas com clareza',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 24),
                           ],
 
                           if (isDesktop) ...[
@@ -192,23 +181,22 @@ class _LoginPageState extends State<LoginPage> {
                           TextFormField(
                             controller: _senhaController,
                             obscureText: obscurePassword,
-                            decoration:
-                                _inputStyle(
-                                  context,
-                                  'Senha',
-                                  Icons.lock_outline_rounded,
-                                ).copyWith(
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      obscurePassword
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                    ),
-                                    onPressed: () => setState(
-                                      () => obscurePassword = !obscurePassword,
-                                    ),
-                                  ),
+                            decoration: _inputStyle(
+                              context,
+                              'Senha',
+                              Icons.lock_outline_rounded,
+                            ).copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
                                 ),
+                                onPressed: () => setState(
+                                  () => obscurePassword = !obscurePassword,
+                                ),
+                              ),
+                            ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Digite sua senha';
@@ -222,42 +210,28 @@ class _LoginPageState extends State<LoginPage> {
 
                           const SizedBox(height: 32),
 
-                          Container(
+                          // Botão de Entrar com gradiente dinâmico
+                          SizedBox(
                             width: double.infinity,
                             height: 56,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: LinearGradient(
-                                colors: [
-                                  theme.colorScheme.primary,
-                                  theme.colorScheme.primary.withValues(
-                                    alpha: 0.8,
-                                  ),
-                                ],
-                              ),
-                            ),
                             child: ElevatedButton(
-                              // Agora o botão desabilita usando o estado de loading vindo do ViewModel
-                              onPressed: authVM.isLoading
-                                  ? null
-                                  : _efetuarLogin,
+                              onPressed: authVM.isLoading ? null : _efetuarLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.transparent,
-                                shadowColor: AppColors.transparent,
+                                backgroundColor: theme.colorScheme.primary, 
+                                foregroundColor: theme.colorScheme.onPrimary,
+                                elevation: 2, // Uma leve sombra para dar profundidade
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(16), 
                                 ),
                               ),
                               child: authVM.isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: AppColors.onPrimary,
-                                    )
+                                  ? const CircularProgressIndicator(color: Colors.white)
                                   : const Text(
                                       'ENTRAR',
                                       style: TextStyle(
-                                        color: AppColors.onPrimary,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1.2,
+                                        fontSize: 16, 
                                       ),
                                     ),
                             ),
