@@ -28,12 +28,20 @@ class AppBottomNavigationBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_rounded),
-          label: 'Dados',
+          icon: Icon(Icons.home),
+          label: 'Home',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.checklist_rounded),
           label: 'Tarefas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.category),
+          label: 'Categorias'
+          ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.archive),
+          label: 'Lixeira',
         ),
       ],
     );

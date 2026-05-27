@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:focus/features/tasks/repositories/task_repository.dart';
+import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
+
+void testeRepository(TaskRepository repo) {
+  repo.getAllTasks();
+}
 
 class TaskViewModel extends ChangeNotifier {
   final TaskRepository _repository;

@@ -8,8 +8,8 @@ import '../viewmodels/task_view_model.dart';
 import './task_detail_screen.dart';
 import './task_form_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class TaskListScreen extends StatelessWidget {
+  const TaskListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

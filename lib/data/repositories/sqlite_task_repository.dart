@@ -1,5 +1,5 @@
 import 'package:focus/features/tasks/models/task_model.dart';
-import 'package:focus/features/tasks/repositories/task_repository.dart';
+import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/data/database_helper.dart';
 
 class SQLiteTaskRepository implements TaskRepository {
