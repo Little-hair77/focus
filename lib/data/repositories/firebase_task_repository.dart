@@ -4,18 +4,21 @@ import 'package:focus/data/repositories/task_repository.dart';
 
 class FirebaseTaskRepository implements TaskRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Nome da coleção que guardará as tarefas na nuvem
   final String _collectionPath = 'tasks';
 
   @override
   Future<void> insertTask(Task task) async {
-    // Insere no Firestore usando o toMap() que você já tem na classe Task
+    // Insere no Firestore usando o toMap() 
     await _firestore.collection(_collectionPath).doc(task.id).set(task.toMap());
   }
 
   @override
   Future<List<Task>> getAllTasks() async {
+    // Busca todos os documentos dentro da coleção 'tasks'
     final snapshot = await _firestore.collection(_collectionPath).get();
     
+    // Converte os documentos retornados para instâncias da classe Task
     return snapshot.docs.map((doc) {
       // Passa o doc.data() para o fromMap da sua classe Task
       return Task.fromMap(doc.data());

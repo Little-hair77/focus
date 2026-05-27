@@ -39,7 +39,7 @@ class Task{
       'id': id,
       'title': title,
       'description': description,
-      'due_date': dueDate?.toIso8601String(), // SQLite não tem tipo Date 
+      'due_date': dueDate?.toIso8601String(), // Convertendo DateTime para String ISO
       'priority': priority.index, // Salva como 0, 1 ou 2 
       'status': status.index,     // Salva como 0, 1 ou 2 
       'category_id': categoryId,
@@ -59,8 +59,8 @@ class Task{
       description: map['description'],
       dueDate: map['due_date'] != null ? DateTime.parse(map['due_date']) : null,
       priority: TaskPriority.values[map['priority'] ?? 1],
-      status: TaskStatus.values[map['status'] ?? 0],
-      categoryId: map['category_id'],
+      status: TaskStatus.values[map['status'] ?? 0], // Recupera o Enum pelo índice
+      categoryId: map['category_id'],                // Recupera o Enum pelo índice
       photoPath: map['photo_path'],
       latitude: map['latitude'],
       longitude: map['longitude'],
