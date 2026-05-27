@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:focus/core/theme/app_theme.dart';
 import 'package:focus/features/tasks/views/dashboard_screen.dart';
-import 'package:focus/features/tasks/views/home.dart';
+import 'package:focus/features/tasks/views/task_list_screen.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/sqlite_task_repository.dart';
@@ -59,7 +59,7 @@ class FocusApp extends StatelessWidget {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) => const DashboardScreen(),
-        '/tasks': (context) => const HomeScreen(),
+        '/tasks': (context) => const TaskListScreen(),
       },
 
       home: const DashboardScreen(),
