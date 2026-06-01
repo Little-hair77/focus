@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
+import 'package:focus/features/categories/viewmodels/category_view_model.dart';
+import 'package:focus/shared/widgets/app_input_decoration.dart';
 
 class TaskFormScreen extends StatefulWidget {
   const TaskFormScreen({super.key});
@@ -22,34 +24,11 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   TaskPriority _selectedPriority = TaskPriority.medium;
   String? _selectedCategoryId;
 
-  // Estilo dos campos adaptado para usar o Tema Centralizado dinâmico
-  InputDecoration _inputStyle(
-    BuildContext context,
-    String label,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(
-        icon,
-        color: theme.colorScheme.primary.withValues(alpha: 0.7),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-      ),
-      floatingLabelStyle: TextStyle(
-        color: theme.colorScheme.primary,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickDate() async {
@@ -98,6 +77,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final categoryVM = context.watch<CategoryViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Define se a tela atual é considerada larga (Tablets ou Computador/Web)
@@ -144,10 +124,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
                   TextFormField(
                     controller: _titleController,
-                    decoration: _inputStyle(
+                    decoration: appInputDecoration(
                       context,
-                      'O que você vai fazer?',
-                      Icons.edit_note_rounded,
+                      label: 'O que você vai fazer?',
+                      icon: Icons.edit_note_rounded,
                     ),
                     validator: (value) => value == null || value.isEmpty
                         ? 'Campo obrigatório'
@@ -159,11 +139,35 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   TextFormField(
                     controller: _descController,
                     maxLines: 3,
-                    decoration: _inputStyle(
+                    decoration: appInputDecoration(
                       context,
-                      'Detalhes adicionais',
-                      Icons.notes_rounded,
+                      label: 'Detalhes adicionais',
+                      icon: Icons.notes_rounded,
                     ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedCategoryId,
+                    decoration: appInputDecoration(
+                      context,
+                      label: 'Categoria',
+                      icon: Icons.category_rounded,
+                    ),
+                    items: categoryVM.categories
+                        .map(
+                          (category) => DropdownMenuItem(
+                            value: category.id,
+                            child: Text(category.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: categoryVM.isLoading
+                        ? null
+                        : (value) {
+                            setState(() => _selectedCategoryId = value);
+                          },
                   ),
 
                   const SizedBox(height: 24),

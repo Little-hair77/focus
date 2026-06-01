@@ -21,25 +21,27 @@ class DatabaseHelper {
     // Abre o banco e define a versão (conforme seu planejamento do Sprint 1)
     return await openDatabase(
       path,
-      version: 1, 
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
   // Scripts de criação extraídos de acordo com a documentação
   Future _createDB(Database db, int version) async {
-    // Tabela de Categorias 
+    // Tabela de Categorias
     await db.execute('''
       CREATE TABLE categories (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL UNIQUE,
         color TEXT NOT NULL,
         icon TEXT,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        deleted_at TEXT
       )
     ''');
 
-    // Tabela de Tarefas com Relacionamentos 
+    // Tabela de Tarefas com Relacionamentos
     await db.execute('''
       CREATE TABLE tasks (
         id TEXT PRIMARY KEY NOT NULL,
@@ -53,12 +55,20 @@ class DatabaseHelper {
         latitude REAL,
         longitude REAL,
         created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
       )
     ''');
   }
 
-  // Método para fechar o banco com segurança 
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE categories ADD COLUMN deleted_at TEXT');
+      await db.execute('ALTER TABLE tasks ADD COLUMN deleted_at TEXT');
+    }
+  }
+
+  // Método para fechar o banco com segurança
   Future close() async {
     final db = await instance.database;
     db.close();

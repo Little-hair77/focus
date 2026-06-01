@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/shared/widgets/app_input_decoration.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
@@ -17,33 +18,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   bool obscurePassword = true;
 
-  InputDecoration _inputStyle(
-    BuildContext context,
-    String label,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(
-        icon,
-        color: theme.colorScheme.primary.withValues(alpha: 0.7),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-      ),
-      floatingLabelStyle: TextStyle(
-        color: theme.colorScheme.primary,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   Future<void> _efetuarCadastro() async {
@@ -57,12 +37,19 @@ class _RegisterPageState extends State<RegisterPage> {
       _passwordController.text,
     );
 
-    if (sucesso && mounted) {
+    if (!mounted) return;
+
+    if (sucesso) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta criada com sucesso 🚀')),
       );
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(authVM.errorMessage ?? 'Erro ao cadastrar.')),
+    );
   }
 
   @override
@@ -114,10 +101,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     TextFormField(
                       controller: _nameController,
-                      decoration: _inputStyle(
+                      decoration: appInputDecoration(
                         context,
-                        'Nome',
-                        Icons.person_outline,
+                        label: 'Nome',
+                        icon: Icons.person_outline,
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Digite seu nome'
@@ -128,10 +115,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: _inputStyle(
+                      decoration: appInputDecoration(
                         context,
-                        'Email',
-                        Icons.email_outlined,
+                        label: 'Email',
+                        icon: Icons.email_outlined,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -147,10 +134,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _passwordController,
                       obscureText: obscurePassword,
                       decoration:
-                          _inputStyle(
+                          appInputDecoration(
                             context,
-                            'Senha',
-                            Icons.lock_outline_rounded,
+                            label: 'Senha',
+                            icon: Icons.lock_outline_rounded,
                           ).copyWith(
                             suffixIcon: IconButton(
                               icon: Icon(

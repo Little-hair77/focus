@@ -5,6 +5,7 @@ import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
+import 'package:focus/shared/widgets/app_card.dart';
 import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -15,7 +16,7 @@ class DashboardScreen extends StatelessWidget {
     final taskVM = context.watch<TaskViewModel>();
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final tasks = taskVM.tasks;
     final totalTasks = tasks.length;
     final pendingTasks = _countStatus(tasks, TaskStatus.pending);
@@ -29,14 +30,7 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const AppBarWidget(),
       drawer: const AppDrawer(),
-      bottomNavigationBar: AppBottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/tasks');
-          }
-        },
-      ),
+      bottomNavigationBar: AppBottomNavigationBar(currentIndex: 0),
       body: taskVM.isLoading
           ? Center(
               child: CircularProgressIndicator(
@@ -45,7 +39,7 @@ class DashboardScreen extends StatelessWidget {
             )
           : SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24), 
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1200),
@@ -56,36 +50,50 @@ class DashboardScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Painel de Controle',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w900,
-                                  color: theme.textTheme.titleLarge?.color,
-                                  letterSpacing: -0.5,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Painel de Controle',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: theme.textTheme.titleLarge?.color,
+                                    letterSpacing: -0.5,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Acompanhe o rendimento do seu foco',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: isDark ? AppColors.darkTextMediumEmphasis : AppColors.textMediumEmphasis,
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Acompanhe o rendimento do seu foco',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: isDark
+                                        ? AppColors.darkTextMediumEmphasis
+                                        : AppColors.textMediumEmphasis,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              completionRate == 1.0 && totalTasks > 0 ? "🔥 Concluído!" : "⚡ Em Foco",
+                              completionRate == 1.0 && totalTasks > 0
+                                  ? "🔥 Concluído!"
+                                  : "⚡ Em Foco",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -96,8 +104,8 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 28),
-                      
-                      // CONTAINER DE CARDS 
+
+                      // CONTAINER DE CARDS
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final isWide = constraints.maxWidth > 760;
@@ -106,39 +114,47 @@ class DashboardScreen extends StatelessWidget {
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                             shrinkWrap: true,
-                            childAspectRatio: isWide ? 1.6 : 1.3,
+                            mainAxisExtent: 160,
                             physics: const NeverScrollableScrollPhysics(),
                             children: [
                               _SummaryCard(
                                 label: 'Total',
                                 value: totalTasks.toString(),
                                 icon: Icons.assignment_rounded,
-                                iconColor: isDark ? const Color(0xFF818CF8) : const Color(0xFF4F46E5), // Indigo
+                                iconColor: isDark
+                                    ? AppColors.darkInfo
+                                    : AppColors.info,
                               ),
                               _SummaryCard(
                                 label: 'Concluídas',
                                 value: doneTasks.toString(),
                                 icon: Icons.check_circle_rounded,
-                                iconColor: isDark ? const Color(0xFF34D399) : const Color(0xFF059669), // Verde Semântico
+                                iconColor: isDark
+                                    ? AppColors.darkSuccess
+                                    : AppColors.success,
                               ),
                               _SummaryCard(
                                 label: 'Alta prioridade',
                                 value: highPriorityTasks.toString(),
                                 icon: Icons.flag_rounded,
-                                iconColor: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706), // Âmbar / Amarelo Alerta
+                                iconColor: isDark
+                                    ? AppColors.darkWarning
+                                    : AppColors.warning,
                               ),
                               _SummaryCard(
                                 label: 'Atrasadas',
                                 value: overdueTasks.toString(),
                                 icon: Icons.warning_rounded,
-                                iconColor: isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626), // Vermelho Alerta Máximo
+                                iconColor: isDark
+                                    ? AppColors.darkDanger
+                                    : AppColors.danger,
                               ),
                             ],
                           );
                         },
                       ),
                       const SizedBox(height: 28),
-                      
+
                       // CHARTS / GRÁFICOS
                       LayoutBuilder(
                         builder: (context, constraints) {
@@ -181,7 +197,9 @@ class DashboardScreen extends StatelessWidget {
                                       .map(
                                         (chart) => Expanded(
                                           child: Padding(
-                                            padding: const EdgeInsets.only(right: 16),
+                                            padding: const EdgeInsets.only(
+                                              right: 16,
+                                            ),
                                             child: chart,
                                           ),
                                         ),
@@ -192,7 +210,9 @@ class DashboardScreen extends StatelessWidget {
                                   children: charts
                                       .map(
                                         (chart) => Padding(
-                                          padding: const EdgeInsets.only(bottom: 16),
+                                          padding: const EdgeInsets.only(
+                                            bottom: 16,
+                                          ),
                                           child: chart,
                                         ),
                                       )
@@ -231,7 +251,7 @@ class _SummaryCard extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color iconColor; 
+  final Color iconColor;
 
   const _SummaryCard({
     required this.label,
@@ -244,9 +264,8 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(20), 
-      decoration: _cardDecoration(theme),
+    return AppCard(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -255,7 +274,7 @@ class _SummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 22),
@@ -267,7 +286,7 @@ class _SummaryCard extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 32, 
+                  fontSize: 32,
                   fontWeight: FontWeight.w800,
                   color: theme.textTheme.titleLarge?.color,
                 ),
@@ -308,10 +327,9 @@ class _ProgressChart extends StatelessWidget {
     final theme = Theme.of(context);
     final percent = (progress * 100).round();
 
-    return Container(
+    return AppCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(theme),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -327,9 +345,12 @@ class _ProgressChart extends StatelessWidget {
                   SizedBox.expand(
                     child: CircularProgressIndicator(
                       value: progress,
-                      strokeWidth: 10, // Diminuído levemente a espessura para ficar mais elegante
+                      strokeWidth:
+                          10, // Diminuído levemente a espessura para ficar mais elegante
                       color: theme.colorScheme.primary,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.1,
+                      ),
                     ),
                   ),
                   Text(
@@ -349,8 +370,8 @@ class _ProgressChart extends StatelessWidget {
             child: Text(
               '$completed de $total focos concluídos',
               style: const TextStyle(
-                color: AppColors.textMuted, 
-                fontSize: 13, 
+                color: AppColors.textMuted,
+                fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -374,10 +395,9 @@ class _BarChart extends StatelessWidget {
       return item.value > max ? item.value : max;
     });
 
-    return Container(
+    return AppCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(theme),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -393,14 +413,19 @@ class _BarChart extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.9),
+                      Flexible(
+                        child: Text(
+                          item.label,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.9),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         item.value.toString(),
                         style: const TextStyle(
@@ -417,7 +442,9 @@ class _BarChart extends StatelessWidget {
                       value: ratio,
                       minHeight: 8,
                       color: theme.colorScheme.primary,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.08,
+                      ),
                     ),
                   ),
                 ],
@@ -454,19 +481,4 @@ class _ChartItem {
   final int value;
 
   const _ChartItem(this.label, this.value);
-}
-
-BoxDecoration _cardDecoration(ThemeData theme) {
-  final isDark = theme.brightness == Brightness.dark;
-  return BoxDecoration(
-    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-    borderRadius: BorderRadius.circular(16), 
-    boxShadow: [
-      BoxShadow(
-        color: isDark ? Colors.transparent : Colors.black.withOpacity(0.03),
-        blurRadius: 16,
-        offset: const Offset(0, 6),
-      ),
-    ],
-  );
 }

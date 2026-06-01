@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
+import 'package:focus/shared/utils/logout.dart';
 import 'package:provider/provider.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
@@ -37,10 +38,9 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           position: PopupMenuPosition.under,
           offset: const Offset(0, 8),
           tooltip: 'Perfil',
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == 'logout') {
-              context.read<AuthViewModel>().logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              await logout(context, context.read<AuthViewModel>());
             }
           },
           itemBuilder: (context) => const [

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/features/categories/viewmodels/category_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
+import 'package:focus/shared/widgets/app_card.dart';
+import 'package:provider/provider.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
@@ -36,7 +39,11 @@ class TaskDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final categoryVM = context.watch<CategoryViewModel>();
+    final categoryName = categoryVM.categories
+        .where((category) => category.id == task.categoryId)
+        .map((category) => category.name)
+        .firstOrNull;
     // A data pode ser nula, então a tela mostra um fallback em vez de quebrar a formatação.
     final dueDate = task.dueDate == null
         ? 'Sem prazo definido'
@@ -77,23 +84,9 @@ class TaskDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Container(
+                AppCard(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    // Replica o contraste dos cards da Home nos modos claro e escuro.
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.shadow.withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -102,9 +95,7 @@ class TaskDetailScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.onPrimary
-                              : AppColors.textHighEmphasis,
+                          color: theme.textTheme.titleLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -147,6 +138,13 @@ class TaskDetailScreen extends StatelessWidget {
                                 Icons.calendar_today_rounded,
                                 'Vencimento',
                                 dueDate,
+                                theme,
+                                itemWidth,
+                              ),
+                              _buildInfoRow(
+                                Icons.category_rounded,
+                                'Categoria',
+                                categoryName ?? 'Sem categoria',
                                 theme,
                                 itemWidth,
                               ),

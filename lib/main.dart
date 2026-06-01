@@ -9,19 +9,26 @@ import 'package:focus/features/tasks/views/dashboard_screen.dart';
 import 'package:focus/features/tasks/views/task_list_screen.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
-import 'package:focus/data/repositories/task_repository.dart'; 
-import 'package:focus/data/repositories/sqlite_task_repository.dart';
+import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/data/repositories/firebase_task_repository.dart';
+import 'package:focus/data/repositories/category_repository.dart';
+import 'package:focus/data/repositories/firebase_category_repository.dart';
+import 'package:focus/features/categories/viewmodels/category_view_model.dart';
+import 'package:focus/features/categories/views/category_list_screen.dart';
+import 'package:focus/features/trash/views/trash_screen.dart';
 import 'package:focus/features/auth/views/login.dart';
 import 'package:focus/features/auth/views/register.dart';
-import 'package:firebase_core/firebase_core.dart'; 
+import 'package:focus/features/auth/views/auth_gate.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:focus/data/repositories/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     debugPrint("Erro ao inicializar o Firebase: $e");
   }
@@ -39,13 +46,27 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<TaskRepository>(create: (_) => FirebaseTaskRepository()),
-        
-        ChangeNotifierProvider(
+        Provider<CategoryRepository>(
+          create: (_) => FirebaseCategoryRepository(),
+        ),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+
+        ChangeNotifierProxyProvider<AuthViewModel, TaskViewModel>(
+          create: (context) => TaskViewModel(context.read<TaskRepository>()),
+          update: (context, authVM, taskVM) {
+            taskVM!.syncUser(authVM.currentUser?.id);
+            return taskVM;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthViewModel, CategoryViewModel>(
           create: (context) =>
-              TaskViewModel(context.read<TaskRepository>())..fetchTasks(),
+              CategoryViewModel(context.read<CategoryRepository>()),
+          update: (context, authVM, categoryVM) {
+            categoryVM!.syncUser(authVM.currentUser?.id);
+            return categoryVM;
+          },
         ),
         ChangeNotifierProvider.value(value: themeViewModel),
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
       ],
       child: const FocusApp(),
     ),
@@ -69,11 +90,17 @@ class FocusApp extends StatelessWidget {
       routes: {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
-        '/home': (context) => const DashboardScreen(),
-        '/tasks': (context) => const TaskListScreen(),
+        '/home': (context) =>
+            const AuthGate(authenticatedScreen: DashboardScreen()),
+        '/tasks': (context) =>
+            const AuthGate(authenticatedScreen: TaskListScreen()),
+        '/categories': (context) =>
+            const AuthGate(authenticatedScreen: CategoryListScreen()),
+        '/trash': (context) =>
+            const AuthGate(authenticatedScreen: TrashScreen()),
       },
 
-      home: const DashboardScreen(),
+      home: const AuthGate(authenticatedScreen: DashboardScreen()),
     );
   }
 }

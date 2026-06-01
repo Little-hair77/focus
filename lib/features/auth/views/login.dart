@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/shared/widgets/app_input_decoration.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
@@ -17,33 +18,11 @@ class _LoginPageState extends State<LoginPage> {
 
   bool obscurePassword = true;
 
-  InputDecoration _inputStyle(
-    BuildContext context,
-    String label,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(
-        icon,
-        color: theme.colorScheme.primary.withValues(alpha: 0.7),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-      ),
-      floatingLabelStyle: TextStyle(
-        color: theme.colorScheme.primary,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _senhaController.dispose();
+    super.dispose();
   }
 
   Future<void> _efetuarLogin() async {
@@ -56,12 +35,19 @@ class _LoginPageState extends State<LoginPage> {
       _senhaController.text,
     );
 
-    if (sucesso && mounted) {
+    if (!mounted) return;
+
+    if (sucesso) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login realizado com sucesso 🚀')),
       );
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(authVM.errorMessage ?? 'Erro ao entrar.')),
+    );
   }
 
   @override
@@ -92,12 +78,12 @@ class _LoginPageState extends State<LoginPage> {
                         height: 500,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 8), 
+                      const SizedBox(height: 8),
                       Text(
                         'Centralize seus objetivos, maximize seus resultados.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: const Color.fromARGB(255, 255, 255, 255),
+                          color: AppColors.onPrimary,
                           fontSize: 15,
                         ),
                       ),
@@ -161,10 +147,10 @@ class _LoginPageState extends State<LoginPage> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: _inputStyle(
+                            decoration: appInputDecoration(
                               context,
-                              'Email',
-                              Icons.email_outlined,
+                              label: 'Email',
+                              icon: Icons.email_outlined,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -181,22 +167,23 @@ class _LoginPageState extends State<LoginPage> {
                           TextFormField(
                             controller: _senhaController,
                             obscureText: obscurePassword,
-                            decoration: _inputStyle(
-                              context,
-                              'Senha',
-                              Icons.lock_outline_rounded,
-                            ).copyWith(
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  obscurePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
+                            decoration:
+                                appInputDecoration(
+                                  context,
+                                  label: 'Senha',
+                                  icon: Icons.lock_outline_rounded,
+                                ).copyWith(
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () => setState(
+                                      () => obscurePassword = !obscurePassword,
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () => setState(
-                                  () => obscurePassword = !obscurePassword,
-                                ),
-                              ),
-                            ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Digite sua senha';
@@ -215,23 +202,28 @@ class _LoginPageState extends State<LoginPage> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: authVM.isLoading ? null : _efetuarLogin,
+                              onPressed: authVM.isLoading
+                                  ? null
+                                  : _efetuarLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary, 
+                                backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: theme.colorScheme.onPrimary,
-                                elevation: 2, // Uma leve sombra para dar profundidade
+                                elevation:
+                                    2, // Uma leve sombra para dar profundidade
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16), 
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
                               child: authVM.isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  ? const CircularProgressIndicator(
+                                      color: AppColors.onPrimary,
+                                    )
                                   : const Text(
                                       'ENTRAR',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1.2,
-                                        fontSize: 16, 
+                                        fontSize: 16,
                                       ),
                                     ),
                             ),

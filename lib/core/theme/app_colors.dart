@@ -17,6 +17,15 @@ class AppColors {
   static const Color darkTextMediumEmphasis = Color(0xFFB8AEC9);
   static const Color textMuted = Colors.grey;
 
+  static const Color info = Color(0xFF4F46E5);
+  static const Color darkInfo = Color(0xFF818CF8);
+  static const Color success = Color(0xFF059669);
+  static const Color darkSuccess = Color(0xFF34D399);
+  static const Color warning = Color(0xFFD97706);
+  static const Color darkWarning = Color(0xFFFBBF24);
+  static const Color danger = Color(0xFFDC2626);
+  static const Color darkDanger = Color(0xFFF87171);
+
   static const Color shadow = Colors.black;
   static const Color transparent = Colors.transparent;
 }

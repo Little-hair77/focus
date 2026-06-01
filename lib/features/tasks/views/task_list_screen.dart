@@ -3,6 +3,9 @@ import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
+import 'package:focus/shared/models/trash_drag_data.dart';
+import 'package:focus/shared/widgets/app_card.dart';
+import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/task_view_model.dart';
 import './task_detail_screen.dart';
@@ -27,11 +30,7 @@ class TaskListScreen extends StatelessWidget {
       appBar: const AppBarWidget(),
       bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: 1,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-        },
+        onTrashDrop: (data) => _moveToTrash(context, data, taskVM),
       ),
 
       body: Padding(
@@ -119,24 +118,11 @@ class TaskListScreen extends StatelessWidget {
   }
 
   // Card isolado e modularizado que se adapta ao grid ou ao listview dinamicamente
-  Widget _buildTaskCard(BuildContext context, dynamic task, dynamic taskVM) {
+  Widget _buildTaskCard(BuildContext context, Task task, TaskViewModel taskVM) {
     final theme = Theme.of(context);
-    final isDone = task.status.index == 2;
+    final isDone = task.status == TaskStatus.done;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? AppColors.darkSurface
-            : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    final card = AppCard(
       child: ListTile(
         onTap: () {
           Navigator.push(
@@ -177,6 +163,30 @@ class TaskListScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return LongPressDraggable<TrashDragData>(
+      data: TrashDragData(id: task.id, type: TrashItemType.task),
+      feedback: Material(
+        color: Colors.transparent,
+        child: SizedBox(width: 320, child: card),
+      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: card),
+      child: card,
+    );
+  }
+
+  Future<void> _moveToTrash(
+    BuildContext context,
+    TrashDragData data,
+    TaskViewModel taskVM,
+  ) async {
+    if (data.type != TrashItemType.task) return;
+    await taskVM.removeTask(data.id);
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Tarefa movida para a lixeira.')),
     );
   }
 

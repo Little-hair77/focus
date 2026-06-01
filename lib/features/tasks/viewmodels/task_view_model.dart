@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus/core/constants/trash_policy.dart';
 import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
 
@@ -10,33 +11,64 @@ class TaskViewModel extends ChangeNotifier {
   final TaskRepository _repository;
 
   List<Task> _tasks = [];
+  List<Task> _trashedTasks = [];
   bool _isLoading = false;
+  String? _activeUserId;
+  int _sessionVersion = 0;
 
   TaskViewModel(this._repository);
 
   List<Task> get tasks => _tasks;
+  List<Task> get trashedTasks => _trashedTasks;
   bool get isLoading => _isLoading;
+
+  void syncUser(String? userId) {
+    if (_activeUserId == userId) return;
+
+    _activeUserId = userId;
+    _sessionVersion++;
+    _tasks = [];
+    _trashedTasks = [];
+
+    if (userId == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    Future.microtask(fetchTasks);
+  }
 
   // Carrega as tarefas do banco de dados
   Future<void> fetchTasks() async {
+    final sessionVersion = _sessionVersion;
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      _tasks = await _repository.getAllTasks();
-
-      // DEBUG
-      debugPrint("--- DEBUG BANCO DE DADOS ---");
-      for (var task in _tasks) {
-        print("Tarefa Salva: ${task.title} | Status: ${task.status}");
+      final tasks = await _repository.getAllTasks();
+      if (_sessionVersion != sessionVersion) return;
+      final now = DateTime.now();
+      final expiredTasks = tasks.where((task) => _isExpired(task, now));
+      for (final task in expiredTasks) {
+        if (_sessionVersion != sessionVersion) return;
+        await _repository.deleteTask(task.id);
       }
-      debugPrint("----------------------------");
+      if (_sessionVersion != sessionVersion) return;
 
+      final retainedTasks = tasks.where((task) => !_isExpired(task, now));
+      _tasks = retainedTasks.where((task) => task.deletedAt == null).toList();
+      _trashedTasks = retainedTasks
+          .where((task) => task.deletedAt != null)
+          .toList();
     } catch (e) {
       debugPrint("Erro ao buscar tarefas: $e");
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (_sessionVersion == sessionVersion) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -46,29 +78,42 @@ class TaskViewModel extends ChangeNotifier {
     await fetchTasks();
   }
 
-  // Deleta uma tarefa
+  // Move uma tarefa para a lixeira.
   Future<void> removeTask(String id) async {
-    await _repository.deleteTask(id);
+    final task = _tasks.where((task) => task.id == id).firstOrNull;
+    if (task == null) return;
+
+    await _repository.updateTask(
+      task.copyWith(deletedAt: DateTime.now(), updatedAt: DateTime.now()),
+    );
+    await fetchTasks();
+  }
+
+  Future<void> restoreTask(String id) async {
+    final task = _trashedTasks.where((task) => task.id == id).firstOrNull;
+    if (task == null) return;
+
+    await _repository.updateTask(
+      task.copyWith(restore: true, updatedAt: DateTime.now()),
+    );
     await fetchTasks();
   }
 
   // Alterna status da tarefa
   Future<void> toggleTaskStatus(Task task) async {
-    final updatedTask = Task(
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      dueDate: task.dueDate,
-      priority: task.priority,
+    final updatedTask = task.copyWith(
       status: task.status == TaskStatus.done
           ? TaskStatus.pending
           : TaskStatus.done,
-      categoryId: task.categoryId,
-      createdAt: task.createdAt,
       updatedAt: DateTime.now(),
     );
 
     await _repository.updateTask(updatedTask);
     await fetchTasks();
+  }
+
+  bool _isExpired(Task task, DateTime now) {
+    final deletedAt = task.deletedAt;
+    return deletedAt != null && TrashPolicy.isExpired(deletedAt, now);
   }
 }
