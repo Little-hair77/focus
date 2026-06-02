@@ -22,6 +22,14 @@ import 'package:focus/features/auth/views/auth_gate.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:focus/data/repositories/firebase_options.dart';
 
+import 'package:focus/core/services/permission_service.dart';
+import 'package:focus/core/services/mock_permission_service.dart';
+import 'package:focus/data/repositories/location/contracts/location_repository.dart';
+import 'package:focus/data/repositories/location/mock_location_repository.dart';
+import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
+import 'package:focus/data/repositories/sensors/mock_sensor_repository.dart';
+import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -50,6 +58,25 @@ void main() async {
           create: (_) => FirebaseCategoryRepository(),
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+
+        Provider<PermissionService>(create: (_) => MockPermissionService()),
+        Provider<LocationRepository>(create: (_) => MockLocationRepository()),
+        Provider<SensorRepository>(
+          create: (_) => MockSensorRepository(),
+          dispose: (_, repository) {
+            if (repository is MockSensorRepository) {
+              repository.dispose(); // Evita vazamento de memória no Chrome
+            }
+          },
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => FocusViewModel(
+            permissionService: context.read<PermissionService>(),
+            locationRepository: context.read<LocationRepository>(),
+            sensorRepository: context.read<SensorRepository>(),
+          ),
+        ),
 
         ChangeNotifierProxyProvider<AuthViewModel, TaskViewModel>(
           create: (context) => TaskViewModel(context.read<TaskRepository>()),
@@ -98,6 +125,7 @@ class FocusApp extends StatelessWidget {
             const AuthGate(authenticatedScreen: CategoryListScreen()),
         '/trash': (context) =>
             const AuthGate(authenticatedScreen: TrashScreen()),
+        //'/focus': (context) => const AuthGate(authenticatedScreen: FocusModeScreen()),
       },
 
       home: const AuthGate(authenticatedScreen: DashboardScreen()),
