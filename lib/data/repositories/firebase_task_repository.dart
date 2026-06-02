@@ -35,7 +35,7 @@ class FirebaseTaskRepository implements TaskRepository {
 
   @override
   Future<void> updateTask(Task task) async {
-    // Atualiza o documento no Firebase usando o ID da tarefa
+    // Atualiza o documento no Firebase usando o ID da tarefa 
     await _tasksCollection.doc(task.id).update(task.toMap());
   }
 
