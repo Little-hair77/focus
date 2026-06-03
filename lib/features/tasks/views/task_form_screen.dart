@@ -74,16 +74,27 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     }
   }
 
+  Color _getPriorityColor(TaskPriority priority) {
+    switch (priority) {
+      case TaskPriority.high:
+        return Colors.red[400]!;
+      case TaskPriority.medium:
+        return Colors.amber[600]!;
+      case TaskPriority.low:
+      default:
+        return Colors.green[400]!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final categoryVM = context.watch<CategoryViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Define se a tela atual é considerada larga (Tablets ou Computador/Web)
     final isWideScreen = screenWidth > 600;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBarWidget(
         leading: IconButton(
           icon: const Icon(
@@ -94,197 +105,230 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      // Centraliza o formulário em telas grandes
       body: Center(
         child: ConstrainedBox(
-          // Se for tela larga, limita a largura em 500px para o design não quebrar ou esticar.
           constraints: BoxConstraints(
-            maxWidth: isWideScreen ? 500 : double.infinity,
+            maxWidth: isWideScreen ? 520 : double.infinity,
           ),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+            padding: const EdgeInsets.all(20.0),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Defina seu próximo objetivo",
+                  // Cabeçalho de Boas-Vindas
+                  Text(
+                    "Novo Objetivo",
                     style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: theme.textTheme.titleLarge?.color,
                       letterSpacing: -0.5,
                     ),
                   ),
+                  Text(
+                    "Organize seus passos e defina prazos claros.",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
                   const SizedBox(height: 24),
 
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: appInputDecoration(
-                      context,
-                      label: 'O que você vai fazer?',
-                      icon: Icons.edit_note_rounded,
+                  //Escopo da Tarefa (CONTAINER CLEAN)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
                     ),
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Campo obrigatório'
-                        : null,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _descController,
-                    maxLines: 3,
-                    decoration: appInputDecoration(
-                      context,
-                      label: 'Detalhes adicionais',
-                      icon: Icons.notes_rounded,
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategoryId,
-                    decoration: appInputDecoration(
-                      context,
-                      label: 'Categoria',
-                      icon: Icons.category_rounded,
-                    ),
-                    items: categoryVM.categories
-                        .map(
-                          (category) => DropdownMenuItem(
-                            value: category.id,
-                            child: Text(category.name),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: categoryVM.isLoading
-                        ? null
-                        : (value) {
-                            setState(() => _selectedCategoryId = value);
-                          },
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Campo de Data (DueDate) Adaptativo
-                  InkWell(
-                    onTap: _pickDate,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.05,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.assignment_outlined, size: 18, color: theme.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            const Text("O que será feito?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_rounded,
-                            color: theme.colorScheme.primary,
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _titleController,
+                          maxLength: 50,
+                          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null, // Oculta contador feio nativo
+                          decoration: appInputDecoration(
+                            context,
+                            label: 'Título do objetivo',
+                            icon: Icons.edit_note_rounded,
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _selectedDate == null
-                                ? 'Quando vence?'
-                                : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
-                            style: TextStyle(
-                              color: _selectedDate == null
-                                  ? AppColors.textMediumEmphasis
-                                  : theme.colorScheme.primary,
-                              fontWeight: _selectedDate == null
-                                  ? FontWeight.normal
-                                  : FontWeight.bold,
-                            ),
+                          validator: (value) => value == null || value.isEmpty ? 'Insira um título para continuar' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _descController,
+                          maxLines: 3,
+                          decoration: appInputDecoration(
+                            context,
+                            label: 'Notas adicionais ou descrição...',
+                            icon: Icons.notes_rounded,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    "Prioridade",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: SegmentedButton<TaskPriority>(
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor: theme.colorScheme.primary
-                            .withValues(alpha: 0.15),
-                        selectedForegroundColor: theme.colorScheme.primary,
-                      ),
-                      segments: const [
-                        ButtonSegment(
-                          value: TaskPriority.low,
-                          label: Text("Baixa"),
-                        ),
-                        ButtonSegment(
-                          value: TaskPriority.medium,
-                          label: Text("Média"),
-                        ),
-                        ButtonSegment(
-                          value: TaskPriority.high,
-                          label: Text("Alta"),
                         ),
                       ],
-                      selected: {_selectedPriority},
-                      onSelectionChanged: (Set<TaskPriority> newSelection) {
-                        setState(() => _selectedPriority = newSelection.first);
-                      },
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
 
-                  // Botão de Salvar Responsivo e com Cores do Tema
+                  // Configurações Metadados
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.tune_rounded, size: 18, color: theme.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            const Text("Ajustes de execução", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Dropdown Categoria
+                        DropdownButtonFormField<String>(
+                          value: _selectedCategoryId,
+                          decoration: appInputDecoration(
+                            context,
+                            label: 'Categoria do projeto',
+                            icon: Icons.category_rounded,
+                          ),
+                          items: categoryVM.categories
+                              .map(
+                                (category) => DropdownMenuItem(
+                                  value: category.id,
+                                  child: Text(category.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: categoryVM.isLoading
+                              ? null
+                              : (value) => setState(() => _selectedCategoryId = value),
+                        ),
+                        
+                        const SizedBox(height: 16),
+
+                        // Seletor de Data customizado estilo Card
+                        InkWell(
+                          onTap: _pickDate,
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: theme.scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: theme.dividerColor.withOpacity(0.08)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.calendar_today_rounded, size: 20, color: theme.colorScheme.primary),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    _selectedDate == null
+                                        ? 'Definir data de vencimento'
+                                        : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: _selectedDate == null ? Colors.grey : theme.colorScheme.primary,
+                                      fontWeight: _selectedDate == null ? FontWeight.normal : FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 24),
+
+                        // Escolha de Prioridade com Chip de Feedback
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Nível de Urgência", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            Chip(
+                              label: Text(
+                                _selectedPriority == TaskPriority.high ? 'ALTA' : _selectedPriority == TaskPriority.medium ? 'MÉDIA' : 'BAIXA',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                              ),
+                              backgroundColor: _getPriorityColor(_selectedPriority),
+                              visualDensity: VisualDensity.compact,
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<TaskPriority>(
+                            style: SegmentedButton.styleFrom(
+                              selectedBackgroundColor: theme.colorScheme.primary.withOpacity(0.12),
+                              selectedForegroundColor: theme.colorScheme.primary,
+                            ),
+                            segments: const [
+                              ButtonSegment(value: TaskPriority.low, label: Text("Baixa")),
+                              ButtonSegment(value: TaskPriority.medium, label: Text("Média")),
+                              ButtonSegment(value: TaskPriority.high, label: Text("Alta")),
+                            ],
+                            selected: {_selectedPriority},
+                            onSelectionChanged: (Set<TaskPriority> newSelection) {
+                              setState(() => _selectedPriority = newSelection.first);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Botão de Criação de Tarefa
                   Center(
                     child: Container(
-                      width: isWideScreen
-                          ? 350
-                          : double
-                                .infinity, // Trava o tamanho se a tela for web/tablet
-                      height: 56,
+                      width: isWideScreen ? 350 : double.infinity,
+                      height: 54,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         gradient: LinearGradient(
                           colors: [
                             theme.colorScheme.primary,
-                            theme.colorScheme.secondary.withValues(alpha: 0.8),
+                            theme.colorScheme.secondary.withOpacity(0.85),
                           ],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
                       ),
                       child: ElevatedButton(
                         onPressed: _saveTask,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.transparent,
-                          shadowColor: AppColors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
                         child: const Text(
-                          "CRIAR TAREFA",
-                          style: TextStyle(
-                            color: AppColors.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          "SALVAR TAREFA",
+                          style: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.5),
                         ),
                       ),
                     ),

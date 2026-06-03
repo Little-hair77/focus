@@ -70,8 +70,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isEditing = widget.category != null;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 600;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBarWidget(
         leading: IconButton(
           icon: const Icon(
@@ -84,98 +87,216 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500),
+          constraints: BoxConstraints(
+            maxWidth: isWideScreen ? 520 : double.infinity,
+          ),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(20.0),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Títulos principais alinhados com o padrão do app
                   Text(
-                    isEditing ? 'Editar categoria' : 'Nova categoria',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                    isEditing ? 'Ajustar Categoria' : 'Nova Categoria',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: theme.textTheme.titleLarge?.color,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: appInputDecoration(
-                      context,
-                      label: 'Nome da categoria',
-                      icon: Icons.category_rounded,
-                    ),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Campo obrigatório'
-                        : null,
+                  Text(
+                    "Agrupe suas tarefas para manter o foco por nicho.",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Cor',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: CategoryPalette.colors.map((color) {
-                      final selected = _selectedColor == color;
-                      final displayColor = CategoryPalette.parse(color);
 
-                      return InkWell(
-                        onTap: () => setState(() => _selectedColor = color),
-                        borderRadius: BorderRadius.circular(22),
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: displayColor,
-                            shape: BoxShape.circle,
-                            border: selected
-                                ? Border.all(
-                                    color: theme.colorScheme.onSurface,
-                                    width: 3,
-                                  )
-                                : null,
+                  // Identificação (CONTAINER CLEAN)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.label_outline_rounded, size: 18, color: theme.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Como se chamará?", 
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _nameController,
+                          maxLength: 25,
+                          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                          decoration: appInputDecoration(
+                            context,
+                            label: 'Ex: Trabalho, Estudos, Saúde...',
+                            icon: Icons.category_rounded,
                           ),
-                          child: selected
-                              ? const Icon(
-                                  Icons.check,
-                                  color: AppColors.onPrimary,
-                                )
+                          validator: (value) => value == null || value.trim().isEmpty
+                              ? 'Insira um nome para a categoria'
                               : null,
                         ),
-                      );
-                    }).toList(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _saveCategory,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+
+                  const SizedBox(height: 20),
+
+                  // Paleta de Cores Visual
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.palette_outlined, size: 18, color: theme.colorScheme.primary),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Identidade Visual", 
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            // Indicador reativo da cor escolhida
+                            Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: CategoryPalette.parse(_selectedColor),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: Wrap(
+                            spacing: 14,
+                            runSpacing: 14,
+                            children: CategoryPalette.colors.map((color) {
+                              final selected = _selectedColor == color;
+                              final displayColor = CategoryPalette.parse(color);
+
+                              return InkWell(
+                                onTap: () => setState(() => _selectedColor = color),
+                                borderRadius: BorderRadius.circular(24),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 46,
+                                  height: 46,
+                                  decoration: BoxDecoration(
+                                    color: displayColor,
+                                    shape: BoxShape.circle,
+                                    boxShadow: selected
+                                        ? [
+                                            BoxShadow(
+                                              color: displayColor.withOpacity(0.4),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            )
+                                          ]
+                                        : null,
+                                    border: selected
+                                        ? Border.all(
+                                            color: theme.brightness == Brightness.dark
+                                                ? Colors.white
+                                                : theme.colorScheme.primary,
+                                            width: 3,
+                                          )
+                                        : null,
+                                  ),
+                                  child: selected
+                                      ? Icon(
+                                          Icons.check,
+                                          color: theme.brightness == Brightness.dark && displayColor == Colors.white
+                                              ? Colors.black
+                                              : Colors.white,
+                                          size: 20,
+                                        )
+                                      : null,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Botão de Confirmação com Gradiente e Feedback de Saving
+                  Center(
+                    child: Container(
+                      width: isWideScreen ? 350 : double.infinity,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: _isSaving
+                              ? [Colors.grey, Colors.grey[400]!]
+                              : [
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.secondary.withOpacity(0.85),
+                                ],
+                        ),
+                        boxShadow: !_isSaving
+                            ? [
+                                BoxShadow(
+                                  color: theme.colorScheme.primary.withOpacity(0.25),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : null,
                       ),
-                      child: Text(
-                        _isSaving
-                            ? 'SALVANDO...'
-                            : isEditing
-                            ? 'SALVAR ALTERAÇÕES'
-                            : 'CRIAR CATEGORIA',
-                        style: const TextStyle(
-                          color: AppColors.onPrimary,
-                          fontWeight: FontWeight.bold,
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _saveCategory,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : Text(
+                                isEditing ? 'SALVAR ALTERAÇÕES' : 'CRIAR CATEGORIA',
+                                style: const TextStyle(
+                                  color: AppColors.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                       ),
                     ),
                   ),

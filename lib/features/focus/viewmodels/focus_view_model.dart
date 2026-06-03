@@ -12,7 +12,8 @@ class FocusViewModel extends ChangeNotifier {
 
   // Estados do Cronômetro
   Timer? _timer;
-  int _secondsRemaining = 25 * 60; // 25 minutos padrão
+  int _defaultSessionMinutes = 25; 
+  int _secondsRemaining = 25 * 60; 
   bool _isActive = false;
   Task? _currentTask;
 
@@ -23,7 +24,7 @@ class FocusViewModel extends ChangeNotifier {
   Map<String, double>? _completionLocation;
   StreamSubscription<bool>? _sensorSubscription;
 
-  // Defique qual tarefa será vinculada ao cronometro
+  // Define qual tarefa será vinculada ao cronometro
   void setTask(Task task){
     _currentTask = task;
     notifyListeners();
@@ -32,6 +33,26 @@ class FocusViewModel extends ChangeNotifier {
   // Limpa a tarefa se o usuário sair do modo foco
   void clearTask(){
     _currentTask = null;
+    notifyListeners();
+  }
+
+  /// Aumenta o tempo em 5 minutos (Apenas se o timer estiver pausado)
+  void incrementTime() {
+    if (_isActive) return;
+    if (_defaultSessionMinutes >= 120) return; // Limite máximo de 2 horas de foco
+    
+    _defaultSessionMinutes += 5;
+    _secondsRemaining = _defaultSessionMinutes * 60;
+    notifyListeners();
+  }
+
+  /// Diminui o tempo em 5 minutos (Apenas se o timer estiver pausado)
+  void decrementTime() {
+    if (_isActive) return;
+    if (_defaultSessionMinutes <= 5) return; // Limite mínimo de 5 minutos de foco
+    
+    _defaultSessionMinutes -= 5;
+    _secondsRemaining = _defaultSessionMinutes * 60;
     notifyListeners();
   }
 
@@ -97,7 +118,9 @@ class FocusViewModel extends ChangeNotifier {
   /// Sessão finalizada com sucesso! Captura o GPS
   void _completeFocusSession() async {
     _pauseTimer();
-    _secondsRemaining = 25 * 60; // Reinicia o timer
+    
+    // ALTERADO: Em vez de voltar fixo para 25, volta para o tempo customizado escolhido
+    _secondsRemaining = _defaultSessionMinutes * 60; 
 
     // Trata a permissão antes de buscar o hardware do GPS
     final hasPermission = await _permissionService.hasLocationPermission();
@@ -108,7 +131,6 @@ class FocusViewModel extends ChangeNotifier {
       }
     }
     
-
     if (_currentTask != null) {
       debugPrint("🚀 Ciclo concluído com sucesso para a tarefa: ${_currentTask!.title}");
       
@@ -116,14 +138,12 @@ class FocusViewModel extends ChangeNotifier {
         debugPrint("📍 Localização do foco: Lat ${_completionLocation!['latitude']}, Long ${_completionLocation!['longitude']}");
       }
       
-      // TODO: No futuro, poderá chamar o TaskRepository aqui para persistir 
-      // esses dados de produtividade (ou o status de concluída) lá no Firebase!
+      // TODO: No futuro, poderá chamar o TaskRepository aqui para persistir no Firebase!
     }
 
     notifyListeners();
   }
 
-  /// IMPORTANTE: Evita vazamento de memória (Memory Leak) ao fechar a tela
   @override
   void dispose() {
     _timer?.cancel();
