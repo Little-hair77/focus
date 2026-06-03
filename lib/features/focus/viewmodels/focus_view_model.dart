@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:focus/core/services/permission_service.dart';
 import 'package:focus/data/repositories/location/contracts/location_repository.dart';
 import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
+import 'package:focus/features/tasks/models/task_model.dart';
 
 class FocusViewModel extends ChangeNotifier {
   final PermissionService _permissionService;
@@ -11,13 +12,28 @@ class FocusViewModel extends ChangeNotifier {
 
   // Estados do Cronômetro
   Timer? _timer;
-  int _secondsRemaining = 3; // 25 minutos padrão
+  int _secondsRemaining = 25 * 60; // 25 minutos padrão
   bool _isActive = false;
+  Task? _currentTask;
+
+  Task? get currentTask => _currentTask;
 
   // Estado do Sensor e GPS
   bool _isDeviceFaceDown = false;
   Map<String, double>? _completionLocation;
   StreamSubscription<bool>? _sensorSubscription;
+
+  // Defique qual tarefa será vinculada ao cronometro
+  void setTask(Task task){
+    _currentTask = task;
+    notifyListeners();
+  }
+
+  // Limpa a tarefa se o usuário sair do modo foco
+  void clearTask(){
+    _currentTask = null;
+    notifyListeners();
+  }
 
   FocusViewModel({
     required PermissionService permissionService,
@@ -92,6 +108,18 @@ class FocusViewModel extends ChangeNotifier {
       }
     }
     
+
+    if (_currentTask != null) {
+      debugPrint("🚀 Ciclo concluído com sucesso para a tarefa: ${_currentTask!.title}");
+      
+      if (_completionLocation != null) {
+        debugPrint("📍 Localização do foco: Lat ${_completionLocation!['latitude']}, Long ${_completionLocation!['longitude']}");
+      }
+      
+      // TODO: No futuro, poderá chamar o TaskRepository aqui para persistir 
+      // esses dados de produtividade (ou o status de concluída) lá no Firebase!
+    }
+
     notifyListeners();
   }
 

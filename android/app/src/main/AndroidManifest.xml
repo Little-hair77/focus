@@ -2,6 +2,11 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Para Android 13 ou superior ler imagens da galeria -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Para compatibilidade com versões anteriores do Android -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
      
     <application
         android:label="focus"

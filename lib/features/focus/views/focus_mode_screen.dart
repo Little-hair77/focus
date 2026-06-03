@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
-import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
-import 'package:focus/data/repositories/sensors/mock_sensor_repository.dart';
 
 class FocusModeScreen extends StatelessWidget {
   const FocusModeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Escuta os estados do cronômetro e do sensor
+    // Escuta em tempo real os estados reativos do cronômetro, sensor e tarefa
     final focusVM = context.watch<FocusViewModel>();
-    
-    // Captura a instância do repositório para podermos simular o clique no Chrome
-    final sensorRepo = context.read<SensorRepository>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,16 +18,38 @@ class FocusModeScreen extends StatelessWidget {
       ),
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
-        // O fundo fica suavemente escuro se o "celular estiver virado na mesa"
+        // O fundo fica suavemente escuro se o sensor detectar o celular virado na mesa
         color: focusVM.isDeviceFaceDown 
             ? Colors.black87 
-            : Theme.of(context).scaffoldBackgroundColor,
+            : theme.scaffoldBackgroundColor,
         padding: const EdgeInsets.all(24.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Ícone Indicador de Estado do Sensor
+              if (focusVM.currentTask != null) ...[
+                Text(
+                  'Focando em:',
+                  style: TextStyle(
+                    fontSize: 14, 
+                    color: focusVM.isDeviceFaceDown ? Colors.grey[400] : Colors.grey[600], 
+                    fontStyle: FontStyle.italic
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  focusVM.currentTask!.title,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: focusVM.isDeviceFaceDown ? Colors.white : theme.textTheme.titleLarge?.color,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+              ],
+
+              // Ícone Indicador de Estado do Sensor Físico
               Icon(
                 focusVM.isDeviceFaceDown ? Icons.phone_android : Icons.screen_lock_portrait,
                 size: 80,
@@ -39,15 +57,16 @@ class FocusModeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              // Texto de Orientação ao Usuário
+              // Texto de Orientação ao Usuário Mobile
               Text(
                 focusVM.isDeviceFaceDown 
                     ? 'Dispositivo virado! Foco Ativo.' 
-                    : 'Vire o celular para baixo para iniciar',
+                    : 'Vire o celular para baixo na mesa para iniciar',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: focusVM.isDeviceFaceDown ? Colors.green : Colors.grey[700],
+                  color: focusVM.isDeviceFaceDown ? Colors.green : Colors.grey[750],
                 ),
               ),
               const SizedBox(height: 40),
@@ -59,7 +78,7 @@ class FocusModeScreen extends StatelessWidget {
                   fontSize: 72,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
-                  color: focusVM.isDeviceFaceDown ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                  color: focusVM.isDeviceFaceDown ? Colors.white : theme.textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 20),
@@ -70,49 +89,24 @@ class FocusModeScreen extends StatelessWidget {
                 backgroundColor: focusVM.isActive ? Colors.amber[100] : Colors.grey[300],
               ),
               
-              const SizedBox(height: 60),
-              const Divider(),
-              const SizedBox(height: 10),
-
-              // 🧪 PAINEL EXCLUSIVO DE TESTE (Para simulação no Chrome)
-              Text(
-                'Ambiente de Testes (Web/Chrome)',
-                style: TextStyle(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic),
-              ),
-              const SizedBox(height: 12),
-              
-              ElevatedButton.icon(
-                icon: const Icon(Icons.touch_app),
-                label: Text(focusVM.isDeviceFaceDown 
-                    ? 'Simular: Desvirar Celular' 
-                    : 'Simular: Virar Celular na Mesa'
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: focusVM.isDeviceFaceDown ? Colors.red[400] : Colors.blue[400],
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () {
-                  // Aqui acontece o gatilho lógico no Mock!
-                  if (sensorRepo is MockSensorRepository) {
-                    sensorRepo.simulateSensorTrigger();
-                  }
-                },
-              ),
-              
-              // Feedback de geolocalização ao terminar o ciclo
-              // Feedback de geolocalização ao terminar o ciclo
+              // Feedback de geolocalização real ao terminar o ciclo
               if (focusVM.completionLocation != null) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Card(
                   color: Colors.green[50],
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.green, width: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: SizedBox(
-                      width: double.infinity, // 👈 Agora o width está no lugar certo (SizedBox)
+                      width: double.infinity,
                       child: Text(
-                        '📍 Último ciclo salvo em:\nLat: ${focusVM.completionLocation!['latitude']}\nLong: ${focusVM.completionLocation!['longitude']}',
+                        '📍 Ciclo concluído com sucesso em:\nLat: ${focusVM.completionLocation!['latitude']}\nLong: ${focusVM.completionLocation!['longitude']}',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
                   ),

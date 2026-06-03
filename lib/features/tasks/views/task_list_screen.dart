@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/task_view_model.dart';
 import './task_detail_screen.dart';
 import './task_form_screen.dart';
+import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
@@ -58,23 +59,20 @@ class TaskListScreen extends StatelessWidget {
                   : taskVM.tasks.isEmpty
                   ? _buildEmptyState()
                   : Center(
-                      // Evita que a grid passe de 1200px em telas Ultra-wide
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
-                        // SELETOR DE LAYOUT RESPONSIVO: Grid para telas largas, Lista para celulares
                         child: isWideScreen
                             ? GridView.builder(
                                 physics: const BouncingScrollPhysics(),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: screenWidth > 900
-                                          ? 3
-                                          : 2, // 3 colunas no PC, 2 no Tablet
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                      mainAxisExtent:
-                                          100, // Altura travada do card
-                                    ),
+                                  crossAxisCount: screenWidth > 900
+                                      ? 3
+                                      : 2,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                  mainAxisExtent: 100,
+                                ),
                                 itemCount: taskVM.tasks.length,
                                 itemBuilder: (context, index) {
                                   final task = taskVM.tasks[index];
@@ -117,49 +115,75 @@ class TaskListScreen extends StatelessWidget {
     );
   }
 
-  // Card isolado e modularizado que se adapta ao grid ou ao listview dinamicamente
+  Color _getPriorityColor(TaskPriority priority) {
+    switch (priority) {
+      case TaskPriority.high:
+        return Colors.red[400]!;     // Alto -> Vermelho
+      case TaskPriority.medium:
+        return Colors.amber[600]!;   // Médio -> Amarelo/Laranja
+      case TaskPriority.low:
+      default:
+        return Colors.green[400]!;   // Baixo -> Verde
+    }
+  }
+
   Widget _buildTaskCard(BuildContext context, Task task, TaskViewModel taskVM) {
     final theme = Theme.of(context);
     final isDone = task.status == TaskStatus.done;
+    
+    // Obtém a cor correta baseada na prioridade da task
+    // (Ajuste o termo 'task.priority' se o nome do atributo na sua model for diferente)
+    final priorityColor = _getPriorityColor(task.priority);
 
     final card = AppCard(
-      child: ListTile(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TaskDetailScreen(task: task),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8), // Mantém o arredondamento do AppCard
+        child: Container(
+          // Adiciona uma barra vertical colorida no lado esquerdo do card indicando a prioridade
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(color: priorityColor, width: 6),
             ),
-          );
-        },
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            decoration: isDone ? TextDecoration.lineThrough : null,
-            color: isDone
-                ? AppColors.textMuted
-                : (theme.brightness == Brightness.dark
-                      ? AppColors.onPrimary
-                      : AppColors.textHighEmphasis),
           ),
-        ),
-        subtitle: Text(
-          task.description ?? 'Sem descrição',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-        ),
-        trailing: Transform.scale(
-          scale: 1.1,
-          child: Checkbox(
-            value: isDone,
-            activeColor: theme.colorScheme.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
+          child: ListTile(
+            // REDIRECIONAMENTO PARA O MODO FOCO AO CLICAR
+            onTap: () {
+              // 1. Injeta a tarefa selecionada dentro do ViewModel de Foco
+              context.read<FocusViewModel>().setTask(task);
+              
+              // 2. Redireciona para a tela do Modo Foco
+              Navigator.of(context).pushNamed('/focus');
+            },
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            title: Text(
+              task.title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: isDone ? TextDecoration.lineThrough : null,
+                color: isDone
+                    ? AppColors.textMuted
+                    : (theme.brightness == Brightness.dark
+                        ? AppColors.onPrimary
+                        : AppColors.textHighEmphasis),
+              ),
             ),
-            onChanged: (value) => taskVM.toggleTaskStatus(task),
+            subtitle: Text(
+              task.description ?? 'Sem descrição',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
+            trailing: Transform.scale(
+              scale: 1.1,
+              child: Checkbox(
+                value: isDone,
+                activeColor: theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                onChanged: (value) => taskVM.toggleTaskStatus(task),
+              ),
+            ),
           ),
         ),
       ),
