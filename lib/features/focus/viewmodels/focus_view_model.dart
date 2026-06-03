@@ -11,7 +11,7 @@ class FocusViewModel extends ChangeNotifier {
 
   // Estados do Cronômetro
   Timer? _timer;
-  int _secondsRemaining = 25 * 60; // 25 minutos padrão
+  int _secondsRemaining = 3; // 25 minutos padrão
   bool _isActive = false;
 
   // Estado do Sensor e GPS

@@ -29,6 +29,7 @@ import 'package:focus/data/repositories/location/mock_location_repository.dart';
 import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
 import 'package:focus/data/repositories/sensors/mock_sensor_repository.dart';
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
+import 'package:focus/features/focus/views/focus_mode_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -118,7 +119,7 @@ class FocusApp extends StatelessWidget {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) =>
-            const AuthGate(authenticatedScreen: DashboardScreen()),
+            const AuthGate(authenticatedScreen: FocusModeScreen()),
         '/tasks': (context) =>
             const AuthGate(authenticatedScreen: TaskListScreen()),
         '/categories': (context) =>
