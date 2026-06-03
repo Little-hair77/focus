@@ -134,8 +134,8 @@ class FocusApp extends StatelessWidget {
             const AuthGate(authenticatedScreen: TrashScreen()),
         '/focus': (context) => 
             const AuthGate(authenticatedScreen: FocusModeScreen()),
-        //'/profile': (context) =>
-            //const AuthGate(authenticatedScreen: ProfileScreen()),
+        '/profile': (context) =>
+            const AuthGate(authenticatedScreen: ProfileScreen()),
       },
 
       home: const AuthGate(authenticatedScreen: DashboardScreen()),
