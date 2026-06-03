@@ -23,11 +23,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:focus/data/repositories/firebase_options.dart';
 
 import 'package:focus/core/services/permission_service.dart';
-import 'package:focus/core/services/mock_permission_service.dart';
+import 'package:focus/core/services/device_permission_service.dart';
 import 'package:focus/data/repositories/location/contracts/location_repository.dart';
-import 'package:focus/data/repositories/location/mock_location_repository.dart';
+import 'package:focus/data/repositories/location/gps_location_repository.dart';
 import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
-import 'package:focus/data/repositories/sensors/mock_sensor_repository.dart';
+import 'package:focus/data/repositories/sensors/device_sensor_repository.dart'; 
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 import 'package:focus/features/focus/views/focus_mode_screen.dart';
 
@@ -60,14 +60,13 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
 
-        Provider<PermissionService>(create: (_) => MockPermissionService()),
-        Provider<LocationRepository>(create: (_) => MockLocationRepository()),
+        Provider<PermissionService>(create: (_) => DevicePermissionService()),
+        Provider<LocationRepository>(create: (_) => GpsLocationRepository()),
         Provider<SensorRepository>(
-          create: (_) => MockSensorRepository(),
+          create: (_) => DeviceSensorRepository(), 
           dispose: (_, repository) {
-            if (repository is MockSensorRepository) {
-              repository.dispose(); // Evita vazamento de memória no Chrome
-            }
+            // Se a biblioteca nativa expuser algum método de fechamento futuramente,
+            // o ciclo de vida seguro já fica garantido pelo Provider aqui.
           },
         ),
 
@@ -119,14 +118,15 @@ class FocusApp extends StatelessWidget {
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) =>
-            const AuthGate(authenticatedScreen: FocusModeScreen()),
+            const AuthGate(authenticatedScreen: DashboardScreen()),
         '/tasks': (context) =>
             const AuthGate(authenticatedScreen: TaskListScreen()),
         '/categories': (context) =>
             const AuthGate(authenticatedScreen: CategoryListScreen()),
         '/trash': (context) =>
             const AuthGate(authenticatedScreen: TrashScreen()),
-        //'/focus': (context) => const AuthGate(authenticatedScreen: FocusModeScreen()),
+        '/focus': (context) => 
+            const AuthGate(authenticatedScreen: FocusModeScreen())
       },
 
       home: const AuthGate(authenticatedScreen: DashboardScreen()),
