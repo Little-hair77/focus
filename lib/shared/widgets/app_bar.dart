@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
-import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
-import 'package:focus/shared/utils/logout.dart';
-import 'package:provider/provider.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
@@ -33,36 +30,15 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: false,
       actions: [
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.account_circle_outlined),
-          position: PopupMenuPosition.under,
-          offset: const Offset(0, 8),
-          tooltip: 'Perfil',
-          onSelected: (value) async {
-            if (value == 'logout') {
-              await logout(context, context.read<AuthViewModel>());
-            }
+        IconButton(
+          icon: const Icon(Icons.account_circle_outlined, size: 28),
+          tooltip: 'Meu Perfil',
+          onPressed: () {
+            // Navega direto para a tela de perfil usando a rota nomeada
+            Navigator.of(context).pushNamed('/profile');
           },
-          itemBuilder: (context) => const [
-            PopupMenuItem(
-              value: 'profile',
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.person_outline),
-                title: Text('Meu perfil'),
-              ),
-            ),
-            PopupMenuDivider(),
-            PopupMenuItem(
-              value: 'logout',
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.logout),
-                title: Text('Sair'),
-              ),
-            ),
-          ],
         ),
+        const SizedBox(width: 8), // Pequeno espaçamento do canto da tela
       ],
     );
   }

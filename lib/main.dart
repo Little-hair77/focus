@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -21,6 +22,16 @@ import 'package:focus/features/auth/views/register.dart';
 import 'package:focus/features/auth/views/auth_gate.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:focus/data/repositories/firebase_options.dart';
+import 'package:focus/core/services/permission_service.dart';
+import 'package:focus/core/services/device_permission_service.dart';
+import 'package:focus/data/repositories/location/contracts/location_repository.dart';
+import 'package:focus/data/repositories/location/gps_location_repository.dart';
+import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
+import 'package:focus/data/repositories/sensors/device_sensor_repository.dart'; 
+import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
+import 'package:focus/features/focus/views/focus_mode_screen.dart';
+import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
+import 'package:focus/features/profile/view/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +61,29 @@ void main() async {
           create: (_) => FirebaseCategoryRepository(),
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+
+        Provider<PermissionService>(create: (_) => DevicePermissionService()),
+        Provider<LocationRepository>(create: (_) => GpsLocationRepository()),
+        Provider<SensorRepository>(
+          create: (_) => DeviceSensorRepository(), 
+          dispose: (_, repository) {
+            // Se a biblioteca nativa expuser algum método de fechamento futuramente,
+            // o ciclo de vida seguro já fica garantido pelo Provider aqui.
+          },
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => FocusViewModel(
+            permissionService: context.read<PermissionService>(),
+            locationRepository: context.read<LocationRepository>(),
+            sensorRepository: context.read<SensorRepository>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => ProfileViewModel(
+            permissionService: context.read<PermissionService>()),
+        ),
 
         ChangeNotifierProxyProvider<AuthViewModel, TaskViewModel>(
           create: (context) => TaskViewModel(context.read<TaskRepository>()),
@@ -98,6 +132,10 @@ class FocusApp extends StatelessWidget {
             const AuthGate(authenticatedScreen: CategoryListScreen()),
         '/trash': (context) =>
             const AuthGate(authenticatedScreen: TrashScreen()),
+        '/focus': (context) => 
+            const AuthGate(authenticatedScreen: FocusModeScreen()),
+        '/profile': (context) =>
+            const AuthGate(authenticatedScreen: ProfileScreen()),
       },
 
       home: const AuthGate(authenticatedScreen: DashboardScreen()),

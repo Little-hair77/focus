@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 import 'package:focus/shared/utils/logout.dart';
 import 'package:focus/shared/widgets/app_version.dart';
@@ -11,16 +10,20 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeVM = context.watch<ThemeViewModel>();
     final authVM = context.watch<AuthViewModel>();
-    final isDark = themeVM.isDarkMode;
     final userName = authVM.userName ?? 'Usuário';
     final userEmail = authVM.userEmail ?? '';
     final initial = userName.trim().isEmpty ? 'U' : userName[0].toUpperCase();
 
+    void navigateTo(String routeName) {
+      Navigator.of(context).pop(); // Fecha o drawer primeiro
+      Navigator.of(context).pushNamed(routeName);
+    }
+
     return Drawer(
       child: Column(
         children: [
+          // Cabeçalho com dados do Usuário
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(color: theme.colorScheme.primary),
             accountName: Text(
@@ -40,22 +43,50 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(
-            leading: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            title: Text(isDark ? "Modo Claro" : "Modo Noturno"),
-            trailing: Switch(
-              value: isDark,
-              onChanged: (value) => themeVM.toggleTheme(),
-              activeThumbColor: theme.colorScheme.primary,
+
+          // Menu de Opções Enxuto e Clean
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // Link Direto para o Modo Foco Geral
+                ListTile(
+                  leading: const Icon(Icons.hourglass_empty_rounded, color: Colors.amber),
+                  title: const Text(
+                    'Modo Foco',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () => navigateTo('/focus'),
+                ),
+
+                // ⚙️ NOVO: Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
+                ListTile(
+                  leading: const Icon(Icons.settings_outlined),
+                  title: const Text('Configurações'),
+                  onTap: () {
+                    // Navega para a sua rota de configurações/tema quando criar, ou mantenha o pop por enquanto
+                    Navigator.of(context).pop();
+                    // Exemplo se tiver a rota: Navigator.of(context).pushNamed('/settings');
+                  },
+                ),
+              ],
             ),
           ),
+
+          const Divider(),
+
+          // Ação de Logout isolada na base
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Sair'),
+            leading: const Icon(Icons.logout, color: Colors.redAccent),
+            title: const Text('Sair', style: TextStyle(color: Colors.redAccent)),
             onTap: () => logout(context, authVM),
           ),
-          const Spacer(),
-          const Padding(padding: EdgeInsets.all(16.0), child: AppVersion()),
+          
+          // Versão do Aplicativo no Rodapé
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: AppVersion(),
+          ),
         ],
       ),
     );
