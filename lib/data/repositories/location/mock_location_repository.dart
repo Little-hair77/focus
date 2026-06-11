@@ -1,7 +1,6 @@
-import 'package:path/path.dart';
 import './contracts/location_repository.dart';
 
-class MockLocationRepository implements LocationRepository{
+class MockLocationRepository implements LocationRepository {
   @override
   Future<bool> isLocationServiceEnabled() async => true;
 

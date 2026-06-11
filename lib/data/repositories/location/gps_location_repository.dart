@@ -9,12 +9,9 @@ class GpsLocationRepository implements LocationRepository {
 
   @override
   Future<Map<String, double>> getCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
-    return {
-      'latitude': position.latitude,
-      'longitude': position.longitude,
-    };
+    return {'latitude': position.latitude, 'longitude': position.longitude};
   }
 }
