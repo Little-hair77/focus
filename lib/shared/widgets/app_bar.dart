@@ -44,13 +44,13 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                 child: CircleAvatar(
-                  radius: 18, // Tamanho ideal para encaixar na AppBar
+                  radius: 18,
                   backgroundColor: theme.colorScheme.onPrimary.withOpacity(0.2),
-                  // 🖼️ Se houver foto escolhida no dispositivo, exibe ela
+                  //  Se houver foto escolhida no dispositivo, exibe ela
                   backgroundImage: profileVM.imageFile != null
                       ? FileImage(profileVM.imageFile!)
                       : null,
-                  // 🔤 Fallback: Se não houver foto, exibe a inicial do usuário em texto branco
+                  //  Fallback: Se não houver foto, exibe a inicial do usuário em texto branco
                   child: profileVM.imageFile == null
                       ? Text(
                           initial,
