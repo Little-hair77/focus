@@ -16,7 +16,7 @@ class AppDrawer extends StatelessWidget {
     final initial = userName.trim().isEmpty ? 'U' : userName[0].toUpperCase();
 
     void navigateTo(String routeName) {
-      Navigator.of(context).pop(); // Fecha o drawer primeiro
+      Navigator.of(context).pop(); 
       Navigator.of(context).pushNamed(routeName);
     }
 
@@ -59,14 +59,13 @@ class AppDrawer extends StatelessWidget {
                   onTap: () => navigateTo('/focus'),
                 ),
 
-                // ⚙️ NOVO: Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
+                // Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
                 ListTile(
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Configurações'),
                   onTap: () {
                     // Navega para a sua rota de configurações/tema quando criar, ou mantenha o pop por enquanto
                     Navigator.of(context).pop();
-                    // Exemplo se tiver a rota: Navigator.of(context).pushNamed('/settings');
                   },
                 ),
               ],
