@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:focus/data/repositories/access_log_repository.dart';
+import 'package:focus/data/repositories/firebase_access_log_repository.dart';
+import 'package:focus/features/auth/services/login_access_recorder.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -27,7 +29,7 @@ import 'package:focus/core/services/device_permission_service.dart';
 import 'package:focus/data/repositories/location/contracts/location_repository.dart';
 import 'package:focus/data/repositories/location/gps_location_repository.dart';
 import 'package:focus/data/repositories/sensors/contracts/sensor_repository.dart';
-import 'package:focus/data/repositories/sensors/device_sensor_repository.dart'; 
+import 'package:focus/data/repositories/sensors/device_sensor_repository.dart';
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 import 'package:focus/features/focus/views/focus_mode_screen.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
@@ -60,12 +62,25 @@ void main() async {
         Provider<CategoryRepository>(
           create: (_) => FirebaseCategoryRepository(),
         ),
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
-
         Provider<PermissionService>(create: (_) => DevicePermissionService()),
         Provider<LocationRepository>(create: (_) => GpsLocationRepository()),
+        Provider<AccessLogRepository>(
+          create: (_) => FirebaseAccessLogRepository(),
+        ),
+        Provider<LoginAccessRecorder>(
+          create: (context) => LoginAccessRecorder(
+            permissionService: context.read<PermissionService>(),
+            locationRepository: context.read<LocationRepository>(),
+            accessLogRepository: context.read<AccessLogRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AuthViewModel(
+            loginAccessRecorder: context.read<LoginAccessRecorder>(),
+          ),
+        ),
         Provider<SensorRepository>(
-          create: (_) => DeviceSensorRepository(), 
+          create: (_) => DeviceSensorRepository(),
           dispose: (_, repository) {
             // Se a biblioteca nativa expuser algum método de fechamento futuramente,
             // o ciclo de vida seguro já fica garantido pelo Provider aqui.
@@ -80,9 +95,17 @@ void main() async {
           ),
         ),
 
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<AuthViewModel, ProfileViewModel>(
           create: (context) => ProfileViewModel(
-            permissionService: context.read<PermissionService>()),
+            accessLogRepository: context.read<AccessLogRepository>(),
+          ),
+          update: (context, authVM, profileVM) {
+            profileVM!.syncUser(
+              authVM.currentUser?.id,
+              accessLogVersion: authVM.accessLogVersion,
+            );
+            return profileVM;
+          },
         ),
 
         ChangeNotifierProxyProvider<AuthViewModel, TaskViewModel>(
@@ -132,7 +155,7 @@ class FocusApp extends StatelessWidget {
             const AuthGate(authenticatedScreen: CategoryListScreen()),
         '/trash': (context) =>
             const AuthGate(authenticatedScreen: TrashScreen()),
-        '/focus': (context) => 
+        '/focus': (context) =>
             const AuthGate(authenticatedScreen: FocusModeScreen()),
         '/profile': (context) =>
             const AuthGate(authenticatedScreen: ProfileScreen()),
