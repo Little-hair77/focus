@@ -64,7 +64,6 @@ class AppDrawer extends StatelessWidget {
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Configurações'),
                   onTap: () {
-                    // Navega para a sua rota de configurações/tema quando criar, ou mantenha o pop por enquanto
                     Navigator.of(context).pop();
                   },
                 ),
