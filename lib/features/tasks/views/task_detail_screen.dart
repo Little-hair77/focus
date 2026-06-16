@@ -8,12 +8,13 @@ import 'package:focus/shared/widgets/app_card.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:provider/provider.dart';
 
+/// Tela de detalhes completos de uma tarefa.
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
 
   const TaskDetailScreen({super.key, required this.task});
 
-  // A model salva prioridade como enum; a tela traduz para texto legível.
+  /// Texto exibido para a prioridade da tarefa.
   String get priorityLabel {
     switch (task.priority) {
       case TaskPriority.low:
@@ -25,7 +26,7 @@ class TaskDetailScreen extends StatelessWidget {
     }
   }
 
-  // Centraliza a conversão do status para evitar texto solto no build.
+  /// Texto exibido para o status da tarefa.
   String get statusLabel {
     switch (task.status) {
       case TaskStatus.pending:
@@ -175,6 +176,7 @@ class TaskDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Monta uma linha de informação da tarefa.
   Widget _buildInfoRow(
     IconData icon,
     String label,

@@ -4,8 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:focus/data/repositories/access_log_repository.dart';
 import 'package:focus/features/profile/models/access_log.dart';
 
+/// Controla foto de perfil e histórico de acessos do usuário.
 class ProfileViewModel extends ChangeNotifier {
+  /// Repositório usado para carregar os registros de acesso.
   final AccessLogRepository _accessLogRepository;
+
+  /// Picker usado para câmera e galeria.
   final ImagePicker _picker = ImagePicker();
 
   File? _imageFile;
@@ -19,12 +23,22 @@ class ProfileViewModel extends ChangeNotifier {
   ProfileViewModel({required AccessLogRepository accessLogRepository})
     : _accessLogRepository = accessLogRepository;
 
+  /// Arquivo local da foto escolhida.
   File? get imageFile => _imageFile;
+
+  /// Indica se uma imagem está sendo processada.
   bool get isLoading => _isLoading;
+
+  /// Indica se o histórico de acessos está carregando.
   bool get isLoadingAccessLogs => _isLoadingAccessLogs;
+
+  /// Mensagem de erro ao carregar acessos.
   String? get accessLogsError => _accessLogsError;
+
+  /// Histórico de acessos recente do usuário.
   List<AccessLog> get accessLogs => List.unmodifiable(_accessLogs);
 
+  /// Sincroniza o viewmodel com usuário e versão da auditoria.
   void syncUser(String? userId, {int accessLogVersion = 0}) {
     final userChanged = _userId != userId;
     final accessLogChanged = _accessLogVersion != accessLogVersion;
@@ -44,6 +58,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Carrega os acessos recentes do usuário ativo.
   Future<void> fetchAccessLogs() async {
     final userId = _userId;
     if (userId == null) return;
@@ -68,6 +83,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Abre a câmera e armazena a foto escolhida.
   Future<void> pickImageFromCamera() async {
     _setLoading(true);
     try {
@@ -87,6 +103,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Abre a galeria e armazena a foto escolhida.
   Future<void> pickImageFromGallery() async {
     _setLoading(true);
     try {
@@ -106,6 +123,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Atualiza o estado de carregamento da foto.
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

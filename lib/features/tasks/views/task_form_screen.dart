@@ -10,13 +10,17 @@ import 'package:focus/features/categories/viewmodels/category_view_model.dart';
 import 'package:focus/shared/widgets/app_input_decoration.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
 
+/// Formulário usado para criar ou editar tarefas.
 class TaskFormScreen extends StatefulWidget {
-  const TaskFormScreen({super.key});
+  final Task? task;
+
+  const TaskFormScreen({super.key, this.task});
 
   @override
   State<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
+/// Estado do formulário de tarefa.
 class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -26,18 +30,36 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   String? _selectedCategoryId;
 
   @override
+  void initState() {
+    super.initState();
+    final task = widget.task;
+    if (task == null) return;
+
+    _titleController.text = task.title;
+    _descController.text = task.description ?? '';
+    _selectedDate = task.dueDate;
+    _selectedPriority = task.priority;
+    _selectedCategoryId = task.categoryId;
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
     super.dispose();
   }
 
+  /// Abre o seletor de data de vencimento.
   Future<void> _pickDate() async {
     final theme = Theme.of(context);
+    final today = DateTime.now();
+    final firstDate = _selectedDate != null && _selectedDate!.isBefore(today)
+        ? _selectedDate!
+        : today;
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: _selectedDate ?? today,
+      firstDate: firstDate,
       lastDate: DateTime(2030),
       builder: (context, child) {
         return Theme(
@@ -54,27 +76,37 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  /// Persiste a tarefa criada ou editada.
   void _saveTask() {
     if (_formKey.currentState!.validate()) {
       final taskVM = context.read<TaskViewModel>();
+      final currentTask = widget.task;
 
-      final newTask = Task(
-        id: const Uuid().v4(),
+      final task = Task(
+        id: currentTask?.id ?? const Uuid().v4(),
         title: _titleController.text,
         description: _descController.text,
         dueDate: _selectedDate,
         priority: _selectedPriority,
-        status: TaskStatus.pending,
+        status: currentTask?.status ?? TaskStatus.pending,
         categoryId: _selectedCategoryId,
-        createdAt: DateTime.now(),
+        photoPath: currentTask?.photoPath,
+        latitude: currentTask?.latitude,
+        longitude: currentTask?.longitude,
+        createdAt: currentTask?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      taskVM.addTask(newTask);
+      if (currentTask == null) {
+        taskVM.addTask(task);
+      } else {
+        taskVM.editTask(task);
+      }
       Navigator.pop(context);
     }
   }
 
+  /// Retorna a cor visual associada à prioridade.
   Color _getPriorityColor(TaskPriority priority) {
     switch (priority) {
       case TaskPriority.high:
@@ -92,6 +124,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     final categoryVM = context.watch<CategoryViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 600;
+    final isEditing = widget.task != null;
 
     return AppGestureNavigation(
       child: Scaffold(
@@ -122,7 +155,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   children: [
                     // Cabeçalho de Boas-Vindas
                     Text(
-                      "Novo Objetivo",
+                      isEditing ? "Editar Objetivo" : "Novo Objetivo",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -131,7 +164,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                       ),
                     ),
                     Text(
-                      "Organize seus passos e defina prazos claros.",
+                      isEditing
+                          ? "Atualize os dados da atividade."
+                          : "Organize seus passos e defina prazos claros.",
                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 24),
@@ -431,8 +466,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: const Text(
-                            "SALVAR TAREFA",
+                          child: Text(
+                            isEditing ? "ATUALIZAR TAREFA" : "SALVAR TAREFA",
                             style: TextStyle(
                               color: AppColors.onPrimary,
                               fontWeight: FontWeight.bold,

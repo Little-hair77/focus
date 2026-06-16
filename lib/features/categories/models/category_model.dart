@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/category_palette.dart';
 
+/// Representa uma categoria usada para agrupar tarefas.
 class Category {
+  /// Identificador único da categoria.
   final String id;
+
+  /// Nome exibido para o usuário.
   final String name;
+
+  /// Cor hexadecimal associada à categoria.
   final String color;
+
+  /// Ícone opcional reservado para evolução visual.
   final String? icon;
+
+  /// Data em que a categoria foi criada.
   final DateTime createdAt;
+
+  /// Data de envio para lixeira, quando aplicável.
   final DateTime? deletedAt;
 
   const Category({
@@ -18,6 +30,7 @@ class Category {
     this.deletedAt,
   });
 
+  /// Cria uma cópia alterando apenas os campos informados.
   Category copyWith({
     String? id,
     String? name,
@@ -37,10 +50,12 @@ class Category {
     );
   }
 
+  /// Cor pronta para uso na interface.
   Color get displayColor {
     return CategoryPalette.parse(color);
   }
 
+  /// Converte a categoria para um mapa persistível.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -52,6 +67,7 @@ class Category {
     };
   }
 
+  /// Cria uma categoria a partir dos dados persistidos.
   factory Category.fromMap(Map<String, dynamic> map) {
     return Category(
       id: map['id'],

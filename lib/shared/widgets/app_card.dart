@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 
+/// Container visual padrão para cards do aplicativo.
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;

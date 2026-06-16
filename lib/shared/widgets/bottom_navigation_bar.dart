@@ -3,6 +3,7 @@ import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
 import 'package:focus/shared/utils/navigation.dart';
 
+/// Barra inferior de navegação principal do app.
 class AppBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
@@ -73,11 +74,13 @@ class AppBottomNavigationBar extends StatelessWidget {
     );
   }
 
+  /// Navega para a aba selecionada preservando a rota correta.
   void _navigate(BuildContext context, int index) {
     navigateToTab(context, currentIndex, index);
   }
 }
 
+/// Item especial da navegação que também aceita drop para lixeira.
 class _TrashDropTarget extends StatefulWidget {
   final ValueChanged<TrashDragData>? onAccept;
   final VoidCallback onTap;
@@ -88,6 +91,7 @@ class _TrashDropTarget extends StatefulWidget {
   State<_TrashDropTarget> createState() => _TrashDropTargetState();
 }
 
+/// Estado visual do alvo da lixeira durante drag and drop.
 class _TrashDropTargetState extends State<_TrashDropTarget> {
   bool _isHovering = false;
 

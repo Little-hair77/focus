@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+/// Exibe a versão instalada do aplicativo.
 class AppVersion extends StatelessWidget {
   const AppVersion({super.key});
 

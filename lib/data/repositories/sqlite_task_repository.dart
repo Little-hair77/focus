@@ -2,25 +2,28 @@ import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/data/database_helper.dart';
 
+/// Repositório local de tarefas usando SQLite.
 class SQLiteTaskRepository implements TaskRepository {
-  // Acessa a instância única do banco de dados [cite: 37, 44]
+  /// Instância única do helper do banco local.
   final _dbHelper = DatabaseHelper.instance;
 
+  /// Insere uma tarefa no banco local.
   @override
   Future<void> insertTask(Task task) async {
     final db = await _dbHelper.database;
     // O toMap() converte DateTime e Enums para tipos que o SQLite aceita [cite: 92, 116]
-    await db.insert(
-      'tasks',
-      task.toMap(),
-    );
+    await db.insert('tasks', task.toMap());
   }
 
+  /// Busca todas as tarefas locais ordenadas por vencimento.
   @override
   Future<List<Task>> getAllTasks() async {
     final db = await _dbHelper.database;
     // Busca todas as tarefas ordenadas por data de vencimento [cite: 104, 116]
-    final List<Map<String, dynamic>> maps = await db.query('tasks', orderBy: 'due_date ASC');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'tasks',
+      orderBy: 'due_date ASC',
+    );
 
     // Transforma a lista de Maps vinda do banco em uma lista de objetos Task [cite: 37, 44]
     return List.generate(maps.length, (i) {
@@ -28,6 +31,7 @@ class SQLiteTaskRepository implements TaskRepository {
     });
   }
 
+  /// Atualiza uma tarefa no banco local.
   @override
   Future<void> updateTask(Task task) async {
     final db = await _dbHelper.database;
@@ -39,16 +43,14 @@ class SQLiteTaskRepository implements TaskRepository {
     );
   }
 
+  /// Remove definitivamente uma tarefa do banco local.
   @override
   Future<void> deleteTask(String id) async {
     final db = await _dbHelper.database;
-    await db.delete(
-      'tasks',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Busca uma tarefa local pelo identificador.
   @override
   Future<Task?> getTaskById(String id) async {
     final db = await _dbHelper.database;

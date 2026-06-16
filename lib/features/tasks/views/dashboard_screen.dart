@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
+import 'package:focus/features/tasks/widgets/dashboard_charts.dart';
+import 'package:focus/features/tasks/widgets/dashboard_summary_card.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
-import 'package:focus/shared/widgets/app_card.dart';
 import 'package:provider/provider.dart';
 
+/// Tela inicial com métricas e gráficos das tarefas.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
@@ -123,7 +125,7 @@ class DashboardScreen extends StatelessWidget {
                               mainAxisExtent: 160,
                               physics: const NeverScrollableScrollPhysics(),
                               children: [
-                                _SummaryCard(
+                                DashboardSummaryCard(
                                   label: 'Total',
                                   value: totalTasks.toString(),
                                   icon: Icons.assignment_rounded,
@@ -131,7 +133,7 @@ class DashboardScreen extends StatelessWidget {
                                       ? AppColors.darkInfo
                                       : AppColors.info,
                                 ),
-                                _SummaryCard(
+                                DashboardSummaryCard(
                                   label: 'Concluídas',
                                   value: doneTasks.toString(),
                                   icon: Icons.check_circle_rounded,
@@ -139,7 +141,7 @@ class DashboardScreen extends StatelessWidget {
                                       ? AppColors.darkSuccess
                                       : AppColors.success,
                                 ),
-                                _SummaryCard(
+                                DashboardSummaryCard(
                                   label: 'Alta prioridade',
                                   value: highPriorityTasks.toString(),
                                   icon: Icons.flag_rounded,
@@ -147,7 +149,7 @@ class DashboardScreen extends StatelessWidget {
                                       ? AppColors.darkWarning
                                       : AppColors.warning,
                                 ),
-                                _SummaryCard(
+                                DashboardSummaryCard(
                                   label: 'Atrasadas',
                                   value: overdueTasks.toString(),
                                   icon: Icons.warning_rounded,
@@ -166,32 +168,35 @@ class DashboardScreen extends StatelessWidget {
                           builder: (context, constraints) {
                             final isWide = constraints.maxWidth > 900;
                             final charts = [
-                              _ProgressChart(
+                              DashboardProgressChart(
                                 title: 'Progresso geral',
                                 progress: completionRate,
                                 completed: doneTasks,
                                 total: totalTasks,
                               ),
-                              _BarChart(
+                              DashboardBarChart(
                                 title: 'Tarefas por status',
                                 items: [
-                                  _ChartItem('Pendentes', pendingTasks),
-                                  _ChartItem('Em andamento', inProgressTasks),
-                                  _ChartItem('Concluídas', doneTasks),
+                                  DashboardChartItem('Pendentes', pendingTasks),
+                                  DashboardChartItem(
+                                    'Em andamento',
+                                    inProgressTasks,
+                                  ),
+                                  DashboardChartItem('Concluídas', doneTasks),
                                 ],
                               ),
-                              _BarChart(
+                              DashboardBarChart(
                                 title: 'Distribuição de prioridade',
                                 items: [
-                                  _ChartItem(
+                                  DashboardChartItem(
                                     'Baixa',
                                     _countPriority(tasks, TaskPriority.low),
                                   ),
-                                  _ChartItem(
+                                  DashboardChartItem(
                                     'Média',
                                     _countPriority(tasks, TaskPriority.medium),
                                   ),
-                                  _ChartItem('Alta', highPriorityTasks),
+                                  DashboardChartItem('Alta', highPriorityTasks),
                                 ],
                               ),
                             ];
@@ -236,14 +241,17 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  /// Conta tarefas por status.
   int _countStatus(List<Task> tasks, TaskStatus status) {
     return tasks.where((task) => task.status == status).length;
   }
 
+  /// Conta tarefas por prioridade.
   int _countPriority(List<Task> tasks, TaskPriority priority) {
     return tasks.where((task) => task.priority == priority).length;
   }
 
+  /// Conta tarefas vencidas que ainda não foram concluídas.
   int _countOverdue(List<Task> tasks) {
     final today = DateTime.now();
     return tasks.where((task) {
@@ -253,257 +261,4 @@ class DashboardScreen extends StatelessWidget {
           task.status != TaskStatus.done;
     }).length;
   }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-
-  const _SummaryCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Semantics(
-      label: '$label: $value',
-      readOnly: true,
-      child: AppCard(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Ícone envelopado em um background suave para parecer mais moderno e clean
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: theme.textTheme.titleLarge?.color,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressChart extends StatelessWidget {
-  final String title;
-  final double progress;
-  final int completed;
-  final int total;
-
-  const _ProgressChart({
-    required this.title,
-    required this.progress,
-    required this.completed,
-    required this.total,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final percent = (progress * 100).round();
-
-    return Semantics(
-      label:
-          '$title. $percent por cento. $completed de $total focos concluídos.',
-      readOnly: true,
-      child: AppCard(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _ChartTitle(title),
-            const SizedBox(height: 32),
-            Center(
-              child: SizedBox(
-                width: 140,
-                height: 140,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox.expand(
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth:
-                            10, // Diminuído levemente a espessura para ficar mais elegante
-                        color: theme.colorScheme.primary,
-                        backgroundColor: theme.colorScheme.primary.withValues(
-                          alpha: 0.1,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '$percent%',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        color: theme.textTheme.titleLarge?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Center(
-              child: Text(
-                '$completed de $total focos concluídos',
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BarChart extends StatelessWidget {
-  final String title;
-  final List<_ChartItem> items;
-
-  const _BarChart({required this.title, required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final maxValue = items.fold<int>(0, (max, item) {
-      return item.value > max ? item.value : max;
-    });
-
-    final semanticSummary = items
-        .map((item) => '${item.label}: ${item.value}')
-        .join(', ');
-
-    return Semantics(
-      label: '$title. $semanticSummary.',
-      readOnly: true,
-      child: AppCard(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _ChartTitle(title),
-            const SizedBox(height: 24),
-            ...items.map((item) {
-              final ratio = maxValue == 0 ? 0.0 : item.value / maxValue;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            item.label,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: theme.textTheme.bodyMedium?.color
-                                  ?.withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          item.value.toString(),
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: ratio,
-                        minHeight: 8,
-                        color: theme.colorScheme.primary,
-                        backgroundColor: theme.colorScheme.primary.withValues(
-                          alpha: 0.08,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChartTitle extends StatelessWidget {
-  final String title;
-
-  const _ChartTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w800,
-        color: Theme.of(context).textTheme.titleMedium?.color,
-        letterSpacing: -0.2,
-      ),
-    );
-  }
-}
-
-class _ChartItem {
-  final String label;
-  final int value;
-
-  const _ChartItem(this.label, this.value);
 }

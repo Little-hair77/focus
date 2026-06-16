@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
 
+/// Tela do modo foco controlado por sensor de proximidade.
 class FocusModeScreen extends StatelessWidget {
   const FocusModeScreen({super.key});
 

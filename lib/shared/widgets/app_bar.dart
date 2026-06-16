@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 
+/// AppBar padrão com logo, nome do app e atalho para perfil.
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
 
