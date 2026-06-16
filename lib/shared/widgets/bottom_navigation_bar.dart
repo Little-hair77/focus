@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
+import 'package:focus/shared/utils/navigation.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -33,18 +34,25 @@ class AppBottomNavigationBar extends StatelessWidget {
               : AppColors.textMediumEmphasis,
           type: BottomNavigationBarType.fixed,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Início',
+              tooltip: 'Ir para o início',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.checklist_rounded),
               label: 'Tarefas',
+              tooltip: 'Ir para tarefas',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.category),
               label: 'Categorias',
+              tooltip: 'Ir para categorias',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.delete_outline),
               label: 'Lixeira',
+              tooltip: 'Ir para lixeira',
             ),
           ],
         ),
@@ -66,10 +74,7 @@ class AppBottomNavigationBar extends StatelessWidget {
   }
 
   void _navigate(BuildContext context, int index) {
-    if (index == currentIndex) return;
-
-    const routes = ['/home', '/tasks', '/categories', '/trash'];
-    Navigator.pushReplacementNamed(context, routes[index]);
+    navigateToTab(context, currentIndex, index);
   }
 }
 
@@ -100,14 +105,19 @@ class _TrashDropTargetState extends State<_TrashDropTarget> {
         widget.onAccept?.call(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            color: _isHovering
-                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.12)
-                : Colors.transparent,
+        return Semantics(
+          button: true,
+          label:
+              'Lixeira. Toque para abrir ou solte aqui para mover para a lixeira.',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              color: _isHovering
+                  ? Theme.of(context).colorScheme.error.withValues(alpha: 0.12)
+                  : Colors.transparent,
+            ),
           ),
         );
       },
