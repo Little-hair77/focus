@@ -11,6 +11,7 @@ import 'package:focus/core/theme/app_theme.dart';
 import 'package:focus/features/tasks/views/dashboard_screen.dart';
 import 'package:focus/features/tasks/views/task_list_screen.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
+import 'package:focus/features/settings/views/settings_screen.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/data/repositories/firebase_task_repository.dart';
@@ -36,6 +37,7 @@ import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 import 'package:focus/features/profile/view/profile_screen.dart';
 import 'package:focus/shared/utils/navigation.dart';
 
+/// Inicializa Firebase, repositórios e providers globais.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -131,6 +133,7 @@ void main() async {
   );
 }
 
+/// Widget raiz que define tema, rotas e providers visíveis ao app.
 class FocusApp extends StatelessWidget {
   const FocusApp({super.key});
 
@@ -162,6 +165,7 @@ class FocusApp extends StatelessWidget {
       '/trash' => const AuthGate(authenticatedScreen: TrashScreen()),
       '/focus' => const AuthGate(authenticatedScreen: FocusModeScreen()),
       '/profile' => const AuthGate(authenticatedScreen: ProfileScreen()),
+      '/settings' => const AuthGate(authenticatedScreen: SettingsScreen()),
       _ => null,
     };
 

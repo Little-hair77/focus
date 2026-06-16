@@ -1,25 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/features/categories/models/category_model.dart';
+import 'package:focus/features/categories/viewmodels/category_view_model.dart';
+import 'package:focus/features/tasks/models/task_model.dart';
+import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
+import 'package:focus/features/tasks/views/task_form_screen.dart';
+import 'package:focus/features/tasks/widgets/category_task_section.dart';
+import 'package:focus/features/tasks/widgets/task_card.dart';
+import 'package:focus/features/tasks/widgets/task_empty_state.dart';
+import 'package:focus/features/tasks/widgets/task_filter_bar.dart';
+import 'package:focus/shared/models/trash_drag_data.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
-import 'package:focus/shared/models/trash_drag_data.dart';
-import 'package:focus/shared/widgets/app_card.dart';
-import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/task_view_model.dart';
-import './task_form_screen.dart';
-import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 
-class TaskListScreen extends StatelessWidget {
+/// Tela de listagem, filtro e agrupamento de tarefas.
+class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
+
+  @override
+  State<TaskListScreen> createState() => _TaskListScreenState();
+}
+
+/// Estado local dos filtros aplicados à lista de tarefas.
+class _TaskListScreenState extends State<TaskListScreen> {
+  final _searchController = TextEditingController();
+  DateTime? _dueDateFilter;
+  bool _showByCategory = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final taskVM = context.watch<TaskViewModel>();
+    final categoryVM = context.watch<CategoryViewModel>();
     final theme = Theme.of(context);
-
+    final categoriesById = {
+      for (final category in categoryVM.categories) category.id: category,
+    };
+    final filteredTasks = _filterTasks(taskVM.tasks);
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 600;
 
@@ -27,15 +52,12 @@ class TaskListScreen extends StatelessWidget {
       tabIndex: 1,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-
         drawer: const AppDrawer(),
-
         appBar: const AppBarWidget(),
         bottomNavigationBar: AppBottomNavigationBar(
           currentIndex: 1,
           onTrashDrop: (data) => _moveToTrash(context, data, taskVM),
         ),
-
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -43,7 +65,7 @@ class TaskListScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
               Text(
-                "Minhas Tarefas",
+                'Minhas Tarefas',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -51,57 +73,41 @@ class TaskListScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              TaskFilterBar(
+                searchController: _searchController,
+                selectedDueDate: _dueDateFilter,
+                showByCategory: _showByCategory,
+                onSearchChanged: (_) => setState(() {}),
+                onPickDueDate: _pickDueDate,
+                onClearDueDate: () => setState(() => _dueDateFilter = null),
+                onShowByCategoryChanged: (value) =>
+                    setState(() => _showByCategory = value),
+              ),
+              const SizedBox(height: 16),
               Expanded(
                 child: taskVM.isLoading
-                    ? Semantics(
-                        label: 'Carregando tarefas',
-                        liveRegion: true,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      )
+                    ? _buildLoadingState(theme)
                     : taskVM.tasks.isEmpty
-                    ? _buildEmptyState()
+                    ? const TaskEmptyState()
+                    : filteredTasks.isEmpty
+                    ? const TaskNoResultsState()
                     : Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 1200),
-                          child: isWideScreen
-                              ? GridView.builder(
-                                  physics: const BouncingScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: screenWidth > 900
-                                            ? 3
-                                            : 2,
-                                        crossAxisSpacing: 16,
-                                        mainAxisSpacing: 16,
-                                        mainAxisExtent: 100,
-                                      ),
-                                  itemCount: taskVM.tasks.length,
-                                  itemBuilder: (context, index) {
-                                    final task = taskVM.tasks[index];
-                                    return _buildTaskCard(
-                                      context,
-                                      task,
-                                      taskVM,
-                                    );
-                                  },
+                          child: _showByCategory
+                              ? _buildCategorizedTaskList(
+                                  filteredTasks,
+                                  categoriesById,
+                                  taskVM,
+                                  isWideScreen,
+                                  screenWidth,
                                 )
-                              : ListView.separated(
-                                  physics: const BouncingScrollPhysics(),
-                                  itemCount: taskVM.tasks.length,
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(height: 12),
-                                  itemBuilder: (context, index) {
-                                    final task = taskVM.tasks[index];
-                                    return _buildTaskCard(
-                                      context,
-                                      task,
-                                      taskVM,
-                                    );
-                                  },
+                              : _buildTaskList(
+                                  filteredTasks,
+                                  categoriesById,
+                                  taskVM,
+                                  isWideScreen,
+                                  screenWidth,
                                 ),
                         ),
                       ),
@@ -119,7 +125,7 @@ class TaskListScreen extends StatelessWidget {
             );
           },
           label: const Text(
-            "Nova Tarefa",
+            'Nova Tarefa',
             style: TextStyle(
               color: AppColors.onPrimary,
               fontWeight: FontWeight.bold,
@@ -131,101 +137,142 @@ class TaskListScreen extends StatelessWidget {
     );
   }
 
-  Color _getPriorityColor(TaskPriority priority) {
-    switch (priority) {
-      case TaskPriority.high:
-        return Colors.red[400]!; // Alto -> Vermelho
-      case TaskPriority.medium:
-        return Colors.amber[600]!; // Médio -> Amarelo/Laranja
-      case TaskPriority.low:
-        return Colors.green[400]!; // Baixo -> Verde
+  /// Abre o seletor de data usado pelo filtro de vencimento.
+  Future<void> _pickDueDate() async {
+    final theme = Theme.of(context);
+    final today = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDateFilter ?? today,
+      firstDate: DateTime(today.year - 5),
+      lastDate: DateTime(today.year + 10),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: theme.colorScheme.primary,
+              brightness: theme.brightness,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() => _dueDateFilter = picked);
     }
   }
 
-  Widget _buildTaskCard(BuildContext context, Task task, TaskViewModel taskVM) {
-    final theme = Theme.of(context);
-    final isDone = task.status == TaskStatus.done;
+  /// Aplica busca textual e filtro por vencimento.
+  List<Task> _filterTasks(List<Task> tasks) {
+    final query = _searchController.text.trim().toLowerCase();
 
-    // Obtém a cor correta baseada na prioridade da task
-    // (Ajuste o termo 'task.priority' se o nome do atributo na sua model for diferente)
-    final priorityColor = _getPriorityColor(task.priority);
+    return tasks.where((task) {
+      final matchesTitle =
+          query.isEmpty || task.title.toLowerCase().contains(query);
+      final matchesDueDate =
+          _dueDateFilter == null ||
+          (task.dueDate != null && _isSameDay(task.dueDate!, _dueDateFilter!));
 
-    final card = AppCard(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          8,
-        ), // Mantém o arredondamento do AppCard
-        child: Container(
-          // Adiciona uma barra vertical colorida no lado esquerdo do card indicando a prioridade
-          decoration: BoxDecoration(
-            border: Border(left: BorderSide(color: priorityColor, width: 6)),
-          ),
-          child: ListTile(
-            // REDIRECIONAMENTO PARA O MODO FOCO AO CLICAR
-            onTap: () {
-              // 1. Injeta a tarefa selecionada dentro do ViewModel de Foco
-              context.read<FocusViewModel>().setTask(task);
+      return matchesTitle && matchesDueDate;
+    }).toList();
+  }
 
-              // 2. Redireciona para a tela do Modo Foco
-              Navigator.of(context).pushNamed('/focus');
-            },
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 4,
-            ),
-            title: Text(
-              task.title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                decoration: isDone ? TextDecoration.lineThrough : null,
-                color: isDone
-                    ? AppColors.textMuted
-                    : (theme.brightness == Brightness.dark
-                          ? AppColors.onPrimary
-                          : AppColors.textHighEmphasis),
-              ),
-            ),
-            subtitle: Text(
-              task.description ?? 'Sem descrição',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-            trailing: Transform.scale(
-              scale: 1.1,
-              child: Checkbox(
-                semanticLabel: isDone
-                    ? 'Tarefa ${task.title} concluída'
-                    : 'Marcar tarefa ${task.title} como concluída',
-                value: isDone,
-                activeColor: theme.colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                onChanged: (value) => taskVM.toggleTaskStatus(task),
-              ),
-            ),
-          ),
+  /// Monta a lista simples de tarefas.
+  Widget _buildTaskList(
+    List<Task> tasks,
+    Map<String, Category> categoriesById,
+    TaskViewModel taskVM,
+    bool isWideScreen,
+    double screenWidth,
+  ) {
+    if (isWideScreen) {
+      return GridView.builder(
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: screenWidth > 900 ? 3 : 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          mainAxisExtent: 100,
         ),
-      ),
-    );
-
-    return Semantics(
-      button: true,
-      hint:
-          'Toque duas vezes para iniciar foco. Pressione e segure para mover para a lixeira.',
-      child: LongPressDraggable<TrashDragData>(
-        data: TrashDragData(id: task.id, type: TrashItemType.task),
-        feedback: Material(
-          color: Colors.transparent,
-          child: SizedBox(width: 320, child: card),
+        itemCount: tasks.length,
+        itemBuilder: (context, index) => TaskCard(
+          task: tasks[index],
+          taskVM: taskVM,
+          categoriesById: categoriesById,
         ),
-        childWhenDragging: Opacity(opacity: 0.4, child: card),
-        child: card,
+      );
+    }
+
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      itemCount: tasks.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => TaskCard(
+        task: tasks[index],
+        taskVM: taskVM,
+        categoriesById: categoriesById,
       ),
     );
   }
 
+  /// Monta a lista agrupada por categoria.
+  Widget _buildCategorizedTaskList(
+    List<Task> tasks,
+    Map<String, Category> categoriesById,
+    TaskViewModel taskVM,
+    bool isWideScreen,
+    double screenWidth,
+  ) {
+    final groupedTasks = <String?, List<Task>>{};
+    for (final task in tasks) {
+      final categoryKey = categoriesById.containsKey(task.categoryId)
+          ? task.categoryId
+          : null;
+      groupedTasks.putIfAbsent(categoryKey, () => []).add(task);
+    }
+
+    final orderedKeys = groupedTasks.keys.toList()
+      ..sort((a, b) {
+        final aName = categoriesById[a]?.name ?? 'Sem categoria';
+        final bName = categoriesById[b]?.name ?? 'Sem categoria';
+        return aName.toLowerCase().compareTo(bName.toLowerCase());
+      });
+
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      itemCount: orderedKeys.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 18),
+      itemBuilder: (context, index) {
+        final categoryId = orderedKeys[index];
+        final category = categoriesById[categoryId];
+
+        return CategoryTaskSection(
+          title: category?.name ?? 'Sem categoria',
+          color: category?.displayColor ?? AppColors.textMuted,
+          tasks: groupedTasks[categoryId]!,
+          taskVM: taskVM,
+          categoriesById: categoriesById,
+          isWideScreen: isWideScreen,
+          screenWidth: screenWidth,
+        );
+      },
+    );
+  }
+
+  /// Monta o estado de carregamento da lista.
+  Widget _buildLoadingState(ThemeData theme) {
+    return Semantics(
+      label: 'Carregando tarefas',
+      liveRegion: true,
+      child: Center(
+        child: CircularProgressIndicator(color: theme.colorScheme.primary),
+      ),
+    );
+  }
+
+  /// Move uma tarefa arrastada para a lixeira.
   Future<void> _moveToTrash(
     BuildContext context,
     TrashDragData data,
@@ -240,26 +287,8 @@ class TaskListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ExcludeSemantics(
-            child: Icon(
-              Icons.assignment_turned_in_outlined,
-              size: 80,
-              color: AppColors.textMuted.withValues(alpha: 0.5),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Tudo limpo por aqui!\nQue tal focar em algo novo?',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textMuted, fontSize: 16),
-          ),
-        ],
-      ),
-    );
+  /// Compara duas datas ignorando horário.
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

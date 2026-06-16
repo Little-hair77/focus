@@ -5,6 +5,7 @@ import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
+/// Tela de cadastro por nome, e-mail e senha.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -12,6 +13,7 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+/// Estado do formulário de cadastro.
 class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -27,6 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  /// Valida o formulário e tenta criar uma nova conta.
   Future<void> _efetuarCadastro() async {
     if (!_formKey.currentState!.validate()) return;
 

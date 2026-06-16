@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:focus/shared/widgets/app_input_decoration.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
 
+/// Formulário usado para criar ou editar categorias.
 class CategoryFormScreen extends StatefulWidget {
   final Category? category;
 
@@ -18,6 +19,7 @@ class CategoryFormScreen extends StatefulWidget {
   State<CategoryFormScreen> createState() => _CategoryFormScreenState();
 }
 
+/// Estado do formulário de categoria.
 class _CategoryFormScreenState extends State<CategoryFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
@@ -37,6 +39,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     super.dispose();
   }
 
+  /// Persiste a categoria criada ou editada.
   Future<void> _saveCategory() async {
     if (!_formKey.currentState!.validate()) return;
 

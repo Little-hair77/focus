@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Cria a decoração padrão usada nos campos de formulário do app.
 InputDecoration appInputDecoration(
   BuildContext context, {
   required String label,

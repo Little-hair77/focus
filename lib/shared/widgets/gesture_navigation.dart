@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/shared/utils/navigation.dart';
 
+/// Envolve telas com navegação horizontal por gesto.
 class AppGestureNavigation extends StatelessWidget {
   final Widget child;
   final int? tabIndex;
@@ -22,6 +23,7 @@ class AppGestureNavigation extends StatelessWidget {
     );
   }
 
+  /// Interpreta o gesto horizontal e navega para a aba vizinha.
   void _handleHorizontalDrag(BuildContext context, DragEndDetails details) {
     final velocity = details.primaryVelocity ?? 0;
     if (velocity.abs() < 360) return;

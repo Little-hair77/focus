@@ -12,6 +12,7 @@ import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:focus/shared/widgets/app_card.dart';
 import 'package:provider/provider.dart';
 
+/// Tela da lixeira com tarefas e categorias removidas.
 class TrashScreen extends StatelessWidget {
   const TrashScreen({super.key});
 
@@ -86,6 +87,7 @@ class TrashScreen extends StatelessWidget {
   }
 }
 
+/// Título de seção dentro da lixeira.
 class _SectionTitle extends StatelessWidget {
   final String title;
 
@@ -103,6 +105,7 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+/// Card de uma tarefa enviada para a lixeira.
 class _TrashTaskCard extends StatelessWidget {
   final Task task;
 
@@ -119,6 +122,7 @@ class _TrashTaskCard extends StatelessWidget {
   }
 }
 
+/// Card de uma categoria enviada para a lixeira.
 class _TrashCategoryCard extends StatelessWidget {
   final Category category;
 
@@ -137,6 +141,7 @@ class _TrashCategoryCard extends StatelessWidget {
   }
 }
 
+/// Card base compartilhado entre itens da lixeira.
 class _TrashCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -172,10 +177,12 @@ class _TrashCard extends StatelessWidget {
   }
 }
 
+/// Calcula dias restantes para exclusão definitiva.
 int _daysRemaining(DateTime deletedAt) {
   return TrashPolicy.daysRemaining(deletedAt, DateTime.now());
 }
 
+/// Estado vazio da lixeira.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 

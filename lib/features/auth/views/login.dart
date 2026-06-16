@@ -5,6 +5,7 @@ import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
+/// Tela de login por e-mail e senha.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -12,6 +13,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// Estado do formulário de login.
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -26,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Valida o formulário e tenta autenticar o usuário.
   Future<void> _efetuarLogin() async {
     if (!_formKey.currentState!.validate()) return;
 

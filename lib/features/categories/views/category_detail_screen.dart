@@ -6,6 +6,7 @@ import 'package:focus/shared/widgets/app_card.dart';
 import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:intl/intl.dart';
 
+/// Tela de detalhes de uma categoria.
 class CategoryDetailScreen extends StatelessWidget {
   final Category category;
 
@@ -122,6 +123,7 @@ class CategoryDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Monta uma linha de informação da categoria.
   Widget _buildInfoRow(
     IconData icon,
     String label,
