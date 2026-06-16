@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 import 'package:focus/core/theme/app_colors.dart';
+import 'package:focus/shared/widgets/gesture_navigation.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -89,231 +90,232 @@ class ProfileScreen extends StatelessWidget {
       formattedCreationDate = '$day/$month/$year';
     }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Meu Perfil',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: AppColors.onPrimary,
+    return AppGestureNavigation(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: const Text(
+            'Meu Perfil',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: AppColors.onPrimary,
+            ),
           ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: AppColors.onPrimary,
+          iconTheme: const IconThemeData(color: AppColors.onPrimary),
         ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: AppColors.onPrimary,
-        iconTheme: const IconThemeData(color: AppColors.onPrimary),
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(24.0),
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-
-              // SEÇÃO AVATAR (FOTO DE PERFIL REATIVA)
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Semantics(
-                    image: true,
-                    label: profileVM.imageFile == null
-                        ? 'Avatar de $userName com inicial $initial'
-                        : 'Foto de perfil de $userName',
-                    child: ExcludeSemantics(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.2,
-                            ),
-                            width: 4,
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 65,
-                          backgroundColor: theme.colorScheme.primary.withValues(
-                            alpha: 0.08,
-                          ),
-                          backgroundImage: profileVM.imageFile != null
-                              ? FileImage(profileVM.imageFile!)
-                              : null,
-                          child: profileVM.imageFile == null
-                              ? Text(
-                                  initial,
-                                  style: TextStyle(
-                                    fontSize: 44,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Botão Flutuante Estilizado para Trocar/Adicionar Foto
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: theme.colorScheme.primary,
-                    child: IconButton(
-                      tooltip: 'Alterar foto de perfil',
-                      icon: const Icon(
-                        Icons.camera_alt,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      onPressed: () =>
-                          _showImagePickerOptions(context, profileVM),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Indicador de Progresso sutil enquanto o arquivo de foto é processado
-              if (profileVM.isLoading) ...[
-                Semantics(
-                  label: 'Processando foto de perfil',
-                  liveRegion: true,
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
-                ),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: Column(
+              children: [
                 const SizedBox(height: 16),
-              ],
 
-              // Nome em destaque abaixo da foto
-              Text(
-                userName,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Painel de Informações do Usuário (CARD CLEAN)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Informações Pessoais',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.dividerColor.withValues(alpha: 0.08),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
+                // SEÇÃO AVATAR (FOTO DE PERFIL REATIVA)
+                Stack(
+                  alignment: Alignment.bottomRight,
                   children: [
-                    ListTile(
-                      leading: Icon(
-                        Icons.person_outline,
-                        color: theme.iconTheme.color?.withValues(alpha: 0.7),
-                      ),
-                      title: const Text(
-                        'Nome de exibição',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      ),
-                      subtitle: Text(
-                        userName,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: theme.textTheme.bodyLarge?.color,
+                    Semantics(
+                      image: true,
+                      label: profileVM.imageFile == null
+                          ? 'Avatar de $userName com inicial $initial'
+                          : 'Foto de perfil de $userName',
+                      child: ExcludeSemantics(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.2,
+                              ),
+                              width: 4,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 65,
+                            backgroundColor: theme.colorScheme.primary
+                                .withValues(alpha: 0.08),
+                            backgroundImage: profileVM.imageFile != null
+                                ? FileImage(profileVM.imageFile!)
+                                : null,
+                            child: profileVM.imageFile == null
+                                ? Text(
+                                    initial,
+                                    style: TextStyle(
+                                      fontSize: 44,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  )
+                                : null,
+                          ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Divider(
-                        height: 1,
-                        color: theme.dividerColor.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.email_outlined,
-                        color: theme.iconTheme.color?.withValues(alpha: 0.7),
-                      ),
-                      title: const Text(
-                        'Endereço de E-mail',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      ),
-                      subtitle: Text(
-                        userEmail,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: theme.textTheme.bodyLarge?.color,
+
+                    // Botão Flutuante Estilizado para Trocar/Adicionar Foto
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: theme.colorScheme.primary,
+                      child: IconButton(
+                        tooltip: 'Alterar foto de perfil',
+                        icon: const Icon(
+                          Icons.camera_alt,
+                          size: 18,
+                          color: Colors.white,
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Divider(
-                        height: 1,
-                        color: theme.dividerColor.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    // 🚀 NOVO: Item de lista exibindo a data de criação da conta
-                    ListTile(
-                      leading: Icon(
-                        Icons.calendar_today_outlined,
-                        color: theme.iconTheme.color?.withValues(alpha: 0.7),
-                      ),
-                      title: const Text(
-                        'Membro desde',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      ),
-                      subtitle: Text(
-                        formattedCreationDate,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
+                        onPressed: () =>
+                            _showImagePickerOptions(context, profileVM),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 32),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Últimos acessos',
-                  style: TextStyle(
-                    fontSize: 14,
+
+                const SizedBox(height: 24),
+
+                // Indicador de Progresso sutil enquanto o arquivo de foto é processado
+                if (profileVM.isLoading) ...[
+                  Semantics(
+                    label: 'Processando foto de perfil',
+                    liveRegion: true,
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Nome em destaque abaixo da foto
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                    letterSpacing: 0.5,
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _AccessTimeline(profileVM: profileVM),
-            ],
+                const SizedBox(height: 32),
+
+                // Painel de Informações do Usuário (CARD CLEAN)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Informações Pessoais',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: theme.dividerColor.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(
+                          Icons.person_outline,
+                          color: theme.iconTheme.color?.withValues(alpha: 0.7),
+                        ),
+                        title: const Text(
+                          'Nome de exibição',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        subtitle: Text(
+                          userName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Divider(
+                          height: 1,
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      ListTile(
+                        leading: Icon(
+                          Icons.email_outlined,
+                          color: theme.iconTheme.color?.withValues(alpha: 0.7),
+                        ),
+                        title: const Text(
+                          'Endereço de E-mail',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        subtitle: Text(
+                          userEmail,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Divider(
+                          height: 1,
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      // 🚀 NOVO: Item de lista exibindo a data de criação da conta
+                      ListTile(
+                        leading: Icon(
+                          Icons.calendar_today_outlined,
+                          color: theme.iconTheme.color?.withValues(alpha: 0.7),
+                        ),
+                        title: const Text(
+                          'Membro desde',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        subtitle: Text(
+                          formattedCreationDate,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Últimos acessos',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _AccessTimeline(profileVM: profileVM),
+              ],
+            ),
           ),
         ),
       ),

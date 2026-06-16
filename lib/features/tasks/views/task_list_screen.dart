@@ -3,12 +3,12 @@ import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
+import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
 import 'package:focus/shared/widgets/app_card.dart';
 import 'package:focus/features/tasks/models/task_model.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/task_view_model.dart';
-import './task_detail_screen.dart';
 import './task_form_screen.dart';
 import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 
@@ -23,97 +23,110 @@ class TaskListScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 600;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+    return AppGestureNavigation(
+      tabIndex: 1,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
 
-      drawer: const AppDrawer(),
+        drawer: const AppDrawer(),
 
-      appBar: const AppBarWidget(),
-      bottomNavigationBar: AppBottomNavigationBar(
-        currentIndex: 1,
-        onTrashDrop: (data) => _moveToTrash(context, data, taskVM),
-      ),
+        appBar: const AppBarWidget(),
+        bottomNavigationBar: AppBottomNavigationBar(
+          currentIndex: 1,
+          onTrashDrop: (data) => _moveToTrash(context, data, taskVM),
+        ),
 
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Text(
-              "Minhas Tarefas",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.textTheme.titleLarge?.color,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                "Minhas Tarefas",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.titleLarge?.color,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: taskVM.isLoading
-                  ? Semantics(
-                      label: 'Carregando tarefas',
-                      liveRegion: true,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: theme.colorScheme.primary,
+              const SizedBox(height: 16),
+              Expanded(
+                child: taskVM.isLoading
+                    ? Semantics(
+                        label: 'Carregando tarefas',
+                        liveRegion: true,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : taskVM.tasks.isEmpty
+                    ? _buildEmptyState()
+                    : Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: isWideScreen
+                              ? GridView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: screenWidth > 900
+                                            ? 3
+                                            : 2,
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                        mainAxisExtent: 100,
+                                      ),
+                                  itemCount: taskVM.tasks.length,
+                                  itemBuilder: (context, index) {
+                                    final task = taskVM.tasks[index];
+                                    return _buildTaskCard(
+                                      context,
+                                      task,
+                                      taskVM,
+                                    );
+                                  },
+                                )
+                              : ListView.separated(
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: taskVM.tasks.length,
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final task = taskVM.tasks[index];
+                                    return _buildTaskCard(
+                                      context,
+                                      task,
+                                      taskVM,
+                                    );
+                                  },
+                                ),
                         ),
                       ),
-                    )
-                  : taskVM.tasks.isEmpty
-                  ? _buildEmptyState()
-                  : Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        child: isWideScreen
-                            ? GridView.builder(
-                                physics: const BouncingScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: screenWidth > 900 ? 3 : 2,
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                      mainAxisExtent: 100,
-                                    ),
-                                itemCount: taskVM.tasks.length,
-                                itemBuilder: (context, index) {
-                                  final task = taskVM.tasks[index];
-                                  return _buildTaskCard(context, task, taskVM);
-                                },
-                              )
-                            : ListView.separated(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: taskVM.tasks.length,
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 12),
-                                itemBuilder: (context, index) {
-                                  final task = taskVM.tasks[index];
-                                  return _buildTaskCard(context, task, taskVM);
-                                },
-                              ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'Adicionar nova tarefa',
-        backgroundColor: theme.colorScheme.primary,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TaskFormScreen()),
-          );
-        },
-        label: const Text(
-          "Nova Tarefa",
-          style: TextStyle(
-            color: AppColors.onPrimary,
-            fontWeight: FontWeight.bold,
+              ),
+            ],
           ),
         ),
-        icon: const Icon(Icons.add, color: AppColors.onPrimary),
+        floatingActionButton: FloatingActionButton.extended(
+          tooltip: 'Adicionar nova tarefa',
+          backgroundColor: theme.colorScheme.primary,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TaskFormScreen()),
+            );
+          },
+          label: const Text(
+            "Nova Tarefa",
+            style: TextStyle(
+              color: AppColors.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          icon: const Icon(Icons.add, color: AppColors.onPrimary),
+        ),
       ),
     );
   }
@@ -125,7 +138,6 @@ class TaskListScreen extends StatelessWidget {
       case TaskPriority.medium:
         return Colors.amber[600]!; // Médio -> Amarelo/Laranja
       case TaskPriority.low:
-      default:
         return Colors.green[400]!; // Baixo -> Verde
     }
   }

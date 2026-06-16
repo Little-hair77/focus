@@ -34,6 +34,7 @@ import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 import 'package:focus/features/focus/views/focus_mode_screen.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 import 'package:focus/features/profile/view/profile_screen.dart';
+import 'package:focus/shared/utils/navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -144,24 +145,37 @@ class FocusApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
 
-      routes: {
-        '/register': (context) => RegisterPage(),
-        '/login': (context) => LoginPage(),
-        '/home': (context) =>
-            const AuthGate(authenticatedScreen: DashboardScreen()),
-        '/tasks': (context) =>
-            const AuthGate(authenticatedScreen: TaskListScreen()),
-        '/categories': (context) =>
-            const AuthGate(authenticatedScreen: CategoryListScreen()),
-        '/trash': (context) =>
-            const AuthGate(authenticatedScreen: TrashScreen()),
-        '/focus': (context) =>
-            const AuthGate(authenticatedScreen: FocusModeScreen()),
-        '/profile': (context) =>
-            const AuthGate(authenticatedScreen: ProfileScreen()),
-      },
-
+      onGenerateRoute: _onGenerateRoute,
       home: const AuthGate(authenticatedScreen: DashboardScreen()),
     );
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final Widget? page = switch (settings.name) {
+      '/register' => const RegisterPage(),
+      '/login' => const LoginPage(),
+      '/home' => const AuthGate(authenticatedScreen: DashboardScreen()),
+      '/tasks' => const AuthGate(authenticatedScreen: TaskListScreen()),
+      '/categories' => const AuthGate(
+        authenticatedScreen: CategoryListScreen(),
+      ),
+      '/trash' => const AuthGate(authenticatedScreen: TrashScreen()),
+      '/focus' => const AuthGate(authenticatedScreen: FocusModeScreen()),
+      '/profile' => const AuthGate(authenticatedScreen: ProfileScreen()),
+      _ => null,
+    };
+
+    if (page == null) return null;
+
+    if (appTabRoutes.contains(settings.name)) {
+      return PageRouteBuilder<void>(
+        settings: settings,
+        pageBuilder: (_, _, _) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      );
+    }
+
+    return MaterialPageRoute<void>(settings: settings, builder: (_) => page);
   }
 }

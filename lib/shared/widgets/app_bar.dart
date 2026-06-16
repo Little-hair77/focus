@@ -54,8 +54,8 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
                   child: ExcludeSemantics(
                     child: CircleAvatar(
                       radius: 18, // Tamanho ideal para encaixar na AppBar
-                      backgroundColor: theme.colorScheme.onPrimary.withOpacity(
-                        0.2,
+                      backgroundColor: theme.colorScheme.onPrimary.withValues(
+                        alpha: 0.2,
                       ),
                       // 🖼️ Se houver foto escolhida no dispositivo, exibe ela
                       backgroundImage: profileVM.imageFile != null

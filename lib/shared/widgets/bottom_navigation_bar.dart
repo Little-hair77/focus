@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
+import 'package:focus/shared/utils/navigation.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -73,10 +74,7 @@ class AppBottomNavigationBar extends StatelessWidget {
   }
 
   void _navigate(BuildContext context, int index) {
-    if (index == currentIndex) return;
-
-    const routes = ['/home', '/tasks', '/categories', '/trash'];
-    Navigator.pushReplacementNamed(context, routes[index]);
+    navigateToTab(context, currentIndex, index);
   }
 }
 

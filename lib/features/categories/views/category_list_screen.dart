@@ -8,6 +8,7 @@ import 'package:focus/features/categories/views/category_detail_screen.dart';
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
+import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
 import 'package:focus/shared/widgets/app_card.dart';
 import 'package:provider/provider.dart';
@@ -20,74 +21,77 @@ class CategoryListScreen extends StatelessWidget {
     final categoryVM = context.watch<CategoryViewModel>();
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const AppDrawer(),
-      appBar: const AppBarWidget(),
-      bottomNavigationBar: AppBottomNavigationBar(
-        currentIndex: 2,
-        onTrashDrop: (data) => _moveToTrash(context, data, categoryVM),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Text(
-              'Categorias',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.textTheme.titleLarge?.color,
+    return AppGestureNavigation(
+      tabIndex: 2,
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        drawer: const AppDrawer(),
+        appBar: const AppBarWidget(),
+        bottomNavigationBar: AppBottomNavigationBar(
+          currentIndex: 2,
+          onTrashDrop: (data) => _moveToTrash(context, data, categoryVM),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                'Categorias',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.titleLarge?.color,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: categoryVM.isLoading
-                  ? Semantics(
-                      label: 'Carregando categorias',
-                      liveRegion: true,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: theme.colorScheme.primary,
+              const SizedBox(height: 16),
+              Expanded(
+                child: categoryVM.isLoading
+                    ? Semantics(
+                        label: 'Carregando categorias',
+                        liveRegion: true,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : categoryVM.categories.isEmpty
+                    ? const _EmptyState()
+                    : Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 800),
+                          child: ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: categoryVM.categories.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final category = categoryVM.categories[index];
+                              return _CategoryCard(category: category);
+                            },
+                          ),
                         ),
                       ),
-                    )
-                  : categoryVM.categories.isEmpty
-                  ? const _EmptyState()
-                  : Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 800),
-                        child: ListView.separated(
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: categoryVM.categories.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final category = categoryVM.categories[index];
-                            return _CategoryCard(category: category);
-                          },
-                        ),
-                      ),
-                    ),
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          tooltip: 'Adicionar nova categoria',
+          backgroundColor: theme.colorScheme.primary,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CategoryFormScreen()),
+          ),
+          icon: const Icon(Icons.add, color: AppColors.onPrimary),
+          label: const Text(
+            'Nova Categoria',
+            style: TextStyle(
+              color: AppColors.onPrimary,
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'Adicionar nova categoria',
-        backgroundColor: theme.colorScheme.primary,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CategoryFormScreen()),
-        ),
-        icon: const Icon(Icons.add, color: AppColors.onPrimary),
-        label: const Text(
-          'Nova Categoria',
-          style: TextStyle(
-            color: AppColors.onPrimary,
-            fontWeight: FontWeight.bold,
           ),
         ),
       ),
