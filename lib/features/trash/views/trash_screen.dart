@@ -49,7 +49,11 @@ class TrashScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Semantics(
+                      label: 'Carregando lixeira',
+                      liveRegion: true,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
                   : isEmpty
                   ? const _EmptyState()
                   : ListView(
@@ -149,13 +153,15 @@ class _TrashCard extends StatelessWidget {
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Icon(icon, color: theme.colorScheme.primary),
+        leading: ExcludeSemantics(
+          child: Icon(icon, color: theme.colorScheme.primary),
+        ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('$daysRemaining dias restantes'),
         trailing: TextButton.icon(
           onPressed: () => onRestore(),
           icon: const Icon(Icons.restore),
-          label: const Text('Restaurar'),
+          label: Text('Restaurar $title'),
         ),
       ),
     );
@@ -175,7 +181,13 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.delete_outline, size: 80, color: AppColors.textMuted),
+          ExcludeSemantics(
+            child: Icon(
+              Icons.delete_outline,
+              size: 80,
+              color: AppColors.textMuted,
+            ),
+          ),
           SizedBox(height: 16),
           Text(
             'A lixeira está vazia.',

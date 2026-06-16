@@ -51,9 +51,13 @@ class TaskListScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: taskVM.isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: theme.colorScheme.primary,
+                  ? Semantics(
+                      label: 'Carregando tarefas',
+                      liveRegion: true,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     )
                   : taskVM.tasks.isEmpty
@@ -66,13 +70,11 @@ class TaskListScreen extends StatelessWidget {
                                 physics: const BouncingScrollPhysics(),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: screenWidth > 900
-                                      ? 3
-                                      : 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  mainAxisExtent: 100,
-                                ),
+                                      crossAxisCount: screenWidth > 900 ? 3 : 2,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                      mainAxisExtent: 100,
+                                    ),
                                 itemCount: taskVM.tasks.length,
                                 itemBuilder: (context, index) {
                                   final task = taskVM.tasks[index];
@@ -96,6 +98,7 @@ class TaskListScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        tooltip: 'Adicionar nova tarefa',
         backgroundColor: theme.colorScheme.primary,
         onPressed: () {
           Navigator.push(
@@ -118,43 +121,46 @@ class TaskListScreen extends StatelessWidget {
   Color _getPriorityColor(TaskPriority priority) {
     switch (priority) {
       case TaskPriority.high:
-        return Colors.red[400]!;     // Alto -> Vermelho
+        return Colors.red[400]!; // Alto -> Vermelho
       case TaskPriority.medium:
-        return Colors.amber[600]!;   // Médio -> Amarelo/Laranja
+        return Colors.amber[600]!; // Médio -> Amarelo/Laranja
       case TaskPriority.low:
       default:
-        return Colors.green[400]!;   // Baixo -> Verde
+        return Colors.green[400]!; // Baixo -> Verde
     }
   }
 
   Widget _buildTaskCard(BuildContext context, Task task, TaskViewModel taskVM) {
     final theme = Theme.of(context);
     final isDone = task.status == TaskStatus.done;
-    
+
     // Obtém a cor correta baseada na prioridade da task
     // (Ajuste o termo 'task.priority' se o nome do atributo na sua model for diferente)
     final priorityColor = _getPriorityColor(task.priority);
 
     final card = AppCard(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8), // Mantém o arredondamento do AppCard
+        borderRadius: BorderRadius.circular(
+          8,
+        ), // Mantém o arredondamento do AppCard
         child: Container(
           // Adiciona uma barra vertical colorida no lado esquerdo do card indicando a prioridade
           decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: priorityColor, width: 6),
-            ),
+            border: Border(left: BorderSide(color: priorityColor, width: 6)),
           ),
           child: ListTile(
             // REDIRECIONAMENTO PARA O MODO FOCO AO CLICAR
             onTap: () {
               // 1. Injeta a tarefa selecionada dentro do ViewModel de Foco
               context.read<FocusViewModel>().setTask(task);
-              
+
               // 2. Redireciona para a tela do Modo Foco
               Navigator.of(context).pushNamed('/focus');
             },
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             title: Text(
               task.title,
               style: TextStyle(
@@ -163,8 +169,8 @@ class TaskListScreen extends StatelessWidget {
                 color: isDone
                     ? AppColors.textMuted
                     : (theme.brightness == Brightness.dark
-                        ? AppColors.onPrimary
-                        : AppColors.textHighEmphasis),
+                          ? AppColors.onPrimary
+                          : AppColors.textHighEmphasis),
               ),
             ),
             subtitle: Text(
@@ -176,6 +182,9 @@ class TaskListScreen extends StatelessWidget {
             trailing: Transform.scale(
               scale: 1.1,
               child: Checkbox(
+                semanticLabel: isDone
+                    ? 'Tarefa ${task.title} concluída'
+                    : 'Marcar tarefa ${task.title} como concluída',
                 value: isDone,
                 activeColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(
@@ -189,14 +198,19 @@ class TaskListScreen extends StatelessWidget {
       ),
     );
 
-    return LongPressDraggable<TrashDragData>(
-      data: TrashDragData(id: task.id, type: TrashItemType.task),
-      feedback: Material(
-        color: Colors.transparent,
-        child: SizedBox(width: 320, child: card),
+    return Semantics(
+      button: true,
+      hint:
+          'Toque duas vezes para iniciar foco. Pressione e segure para mover para a lixeira.',
+      child: LongPressDraggable<TrashDragData>(
+        data: TrashDragData(id: task.id, type: TrashItemType.task),
+        feedback: Material(
+          color: Colors.transparent,
+          child: SizedBox(width: 320, child: card),
+        ),
+        childWhenDragging: Opacity(opacity: 0.4, child: card),
+        child: card,
       ),
-      childWhenDragging: Opacity(opacity: 0.4, child: card),
-      child: card,
     );
   }
 
@@ -219,10 +233,12 @@ class TaskListScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.assignment_turned_in_outlined,
-            size: 80,
-            color: AppColors.textMuted.withValues(alpha: 0.5),
+          ExcludeSemantics(
+            child: Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 80,
+              color: AppColors.textMuted.withValues(alpha: 0.5),
+            ),
           ),
           const SizedBox(height: 16),
           const Text(

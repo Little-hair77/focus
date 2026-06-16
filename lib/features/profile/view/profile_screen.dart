@@ -117,32 +117,42 @@ class ProfileScreen extends StatelessWidget {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                        width: 4,
+                  Semantics(
+                    image: true,
+                    label: profileVM.imageFile == null
+                        ? 'Avatar de $userName com inicial $initial'
+                        : 'Foto de perfil de $userName',
+                    child: ExcludeSemantics(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.2,
+                            ),
+                            width: 4,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 65,
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.08,
+                          ),
+                          backgroundImage: profileVM.imageFile != null
+                              ? FileImage(profileVM.imageFile!)
+                              : null,
+                          child: profileVM.imageFile == null
+                              ? Text(
+                                  initial,
+                                  style: TextStyle(
+                                    fontSize: 44,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                )
+                              : null,
+                        ),
                       ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 65,
-                      backgroundColor: theme.colorScheme.primary.withValues(
-                        alpha: 0.08,
-                      ),
-                      backgroundImage: profileVM.imageFile != null
-                          ? FileImage(profileVM.imageFile!)
-                          : null,
-                      child: profileVM.imageFile == null
-                          ? Text(
-                              initial,
-                              style: TextStyle(
-                                fontSize: 44,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            )
-                          : null,
                     ),
                   ),
 
@@ -151,6 +161,7 @@ class ProfileScreen extends StatelessWidget {
                     radius: 20,
                     backgroundColor: theme.colorScheme.primary,
                     child: IconButton(
+                      tooltip: 'Alterar foto de perfil',
                       icon: const Icon(
                         Icons.camera_alt,
                         size: 18,
@@ -167,10 +178,14 @@ class ProfileScreen extends StatelessWidget {
 
               // Indicador de Progresso sutil enquanto o arquivo de foto é processado
               if (profileVM.isLoading) ...[
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                Semantics(
+                  label: 'Processando foto de perfil',
+                  liveRegion: true,
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
                 ),
                 const SizedBox(height: 16),
               ],

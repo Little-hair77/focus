@@ -33,18 +33,25 @@ class AppBottomNavigationBar extends StatelessWidget {
               : AppColors.textMediumEmphasis,
           type: BottomNavigationBarType.fixed,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Início',
+              tooltip: 'Ir para o início',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.checklist_rounded),
               label: 'Tarefas',
+              tooltip: 'Ir para tarefas',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.category),
               label: 'Categorias',
+              tooltip: 'Ir para categorias',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.delete_outline),
               label: 'Lixeira',
+              tooltip: 'Ir para lixeira',
             ),
           ],
         ),
@@ -100,14 +107,19 @@ class _TrashDropTargetState extends State<_TrashDropTarget> {
         widget.onAccept?.call(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            color: _isHovering
-                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.12)
-                : Colors.transparent,
+        return Semantics(
+          button: true,
+          label:
+              'Lixeira. Toque para abrir ou solte aqui para mover para a lixeira.',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              color: _isHovering
+                  ? Theme.of(context).colorScheme.error.withValues(alpha: 0.12)
+                  : Colors.transparent,
+            ),
           ),
         );
       },

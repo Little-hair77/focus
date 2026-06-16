@@ -45,9 +45,13 @@ class CategoryListScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: categoryVM.isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: theme.colorScheme.primary,
+                  ? Semantics(
+                      label: 'Carregando categorias',
+                      liveRegion: true,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     )
                   : categoryVM.categories.isEmpty
@@ -72,6 +76,7 @@ class CategoryListScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        tooltip: 'Adicionar nova categoria',
         backgroundColor: theme.colorScheme.primary,
         onPressed: () => Navigator.push(
           context,
@@ -157,14 +162,19 @@ class _CategoryCard extends StatelessWidget {
       ),
     );
 
-    return LongPressDraggable<TrashDragData>(
-      data: TrashDragData(id: category.id, type: TrashItemType.category),
-      feedback: Material(
-        color: Colors.transparent,
-        child: SizedBox(width: 360, child: card),
+    return Semantics(
+      button: true,
+      hint:
+          'Toque duas vezes para abrir detalhes. Pressione e segure para mover para a lixeira.',
+      child: LongPressDraggable<TrashDragData>(
+        data: TrashDragData(id: category.id, type: TrashItemType.category),
+        feedback: Material(
+          color: Colors.transparent,
+          child: SizedBox(width: 360, child: card),
+        ),
+        childWhenDragging: Opacity(opacity: 0.4, child: card),
+        child: card,
       ),
-      childWhenDragging: Opacity(opacity: 0.4, child: card),
-      child: card,
     );
   }
 
@@ -211,7 +221,13 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.category_outlined, size: 80, color: AppColors.textMuted),
+          ExcludeSemantics(
+            child: Icon(
+              Icons.category_outlined,
+              size: 80,
+              color: AppColors.textMuted,
+            ),
+          ),
           SizedBox(height: 16),
           Text(
             'Nenhuma categoria cadastrada.',

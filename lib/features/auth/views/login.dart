@@ -72,11 +72,15 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        'assets/images/focusLogo2.png',
-                        width: 500,
-                        height: 500,
-                        fit: BoxFit.contain,
+                      Semantics(
+                        image: true,
+                        label: 'Logo do Focus',
+                        child: Image.asset(
+                          'assets/images/focusLogo2.png',
+                          width: 500,
+                          height: 500,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -111,10 +115,14 @@ class _LoginPageState extends State<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (!isDesktop) ...[
-                            Image.asset(
-                              'assets/images/focusLogo.png',
-                              width: 500,
-                              fit: BoxFit.contain,
+                            Semantics(
+                              image: true,
+                              label: 'Logo do Focus',
+                              child: Image.asset(
+                                'assets/images/focusLogo.png',
+                                width: 500,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                             // O texto agora usa uma transformação leve para subir e anular o padding da imagem
                             Transform.translate(
@@ -174,6 +182,9 @@ class _LoginPageState extends State<LoginPage> {
                                   icon: Icons.lock_outline_rounded,
                                 ).copyWith(
                                   suffixIcon: IconButton(
+                                    tooltip: obscurePassword
+                                        ? 'Mostrar senha'
+                                        : 'Ocultar senha',
                                     icon: Icon(
                                       obscurePassword
                                           ? Icons.visibility_outlined
@@ -215,8 +226,12 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               child: authVM.isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: AppColors.onPrimary,
+                                  ? Semantics(
+                                      label: 'Entrando',
+                                      liveRegion: true,
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.onPrimary,
+                                      ),
                                     )
                                   : const Text(
                                       'ENTRAR',

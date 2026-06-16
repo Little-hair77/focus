@@ -12,15 +12,12 @@ class FocusModeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Modo Foco'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Modo Foco'), centerTitle: true),
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         // O fundo fica suavemente escuro se o sensor detectar o celular virado na mesa
-        color: focusVM.isDeviceFaceDown 
-            ? Colors.black87 
+        color: focusVM.isDeviceFaceDown
+            ? Colors.black87
             : theme.scaffoldBackgroundColor,
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -31,9 +28,11 @@ class FocusModeScreen extends StatelessWidget {
                 Text(
                   'Focando em:',
                   style: TextStyle(
-                    fontSize: 14, 
-                    color: focusVM.isDeviceFaceDown ? Colors.grey[400] : Colors.grey[600], 
-                    fontStyle: FontStyle.italic
+                    fontSize: 14,
+                    color: focusVM.isDeviceFaceDown
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -42,7 +41,9 @@ class FocusModeScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: focusVM.isDeviceFaceDown ? Colors.white : theme.textTheme.titleLarge?.color,
+                    color: focusVM.isDeviceFaceDown
+                        ? Colors.white
+                        : theme.textTheme.titleLarge?.color,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -50,35 +51,56 @@ class FocusModeScreen extends StatelessWidget {
               ],
 
               // Ícone Indicador de Estado do Sensor Físico
-              Icon(
-                focusVM.isDeviceFaceDown ? Icons.phone_android : Icons.screen_lock_portrait,
-                size: 80,
-                color: focusVM.isDeviceFaceDown ? Colors.green : Colors.grey,
+              Semantics(
+                image: true,
+                label: focusVM.isDeviceFaceDown
+                    ? 'Celular virado para baixo. Foco ativo.'
+                    : 'Celular em uso. Foco pausado.',
+                liveRegion: true,
+                child: ExcludeSemantics(
+                  child: Icon(
+                    focusVM.isDeviceFaceDown
+                        ? Icons.phone_android
+                        : Icons.screen_lock_portrait,
+                    size: 80,
+                    color: focusVM.isDeviceFaceDown
+                        ? Colors.green
+                        : Colors.grey,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              
+
               // Texto de Orientação ao Usuário Mobile
               Text(
-                focusVM.isDeviceFaceDown 
-                    ? 'Dispositivo virado! Foco Ativo.' 
+                focusVM.isDeviceFaceDown
+                    ? 'Dispositivo virado! Foco Ativo.'
                     : 'Vire o celular para baixo na mesa para iniciar',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: focusVM.isDeviceFaceDown ? Colors.green : Colors.grey[750],
+                  color: focusVM.isDeviceFaceDown
+                      ? Colors.green
+                      : Colors.grey[750],
                 ),
               ),
               const SizedBox(height: 40),
 
               // O CRONÔMETRO REATIVO (Estilo Pomodoro)
-              Text(
-                focusVM.formattedTime,
-                style: TextStyle(
-                  fontSize: 72,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                  color: focusVM.isDeviceFaceDown ? Colors.white : theme.textTheme.bodyLarge?.color,
+              Semantics(
+                label: 'Tempo de foco ${focusVM.formattedTime}',
+                liveRegion: true,
+                child: Text(
+                  focusVM.formattedTime,
+                  style: TextStyle(
+                    fontSize: 72,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                    color: focusVM.isDeviceFaceDown
+                        ? Colors.white
+                        : theme.textTheme.bodyLarge?.color,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -86,9 +108,11 @@ class FocusModeScreen extends StatelessWidget {
               // Indicador de Status do Timer
               Chip(
                 label: Text(focusVM.isActive ? 'CONTANDO...' : 'PAUSADO'),
-                backgroundColor: focusVM.isActive ? Colors.amber[100] : Colors.grey[300],
+                backgroundColor: focusVM.isActive
+                    ? Colors.amber[100]
+                    : Colors.grey[300],
               ),
-              
+
               // Feedback de geolocalização real ao terminar o ciclo
               if (focusVM.completionLocation != null) ...[
                 const SizedBox(height: 40),
@@ -106,12 +130,16 @@ class FocusModeScreen extends StatelessWidget {
                       child: Text(
                         '📍 Ciclo concluído com sucesso em:\nLat: ${focusVM.completionLocation!['latitude']}\nLong: ${focusVM.completionLocation!['longitude']}',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
-                )
-              ]
+                ),
+              ],
             ],
           ),
         ),

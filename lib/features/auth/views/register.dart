@@ -63,6 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Voltar',
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: theme.colorScheme.primary,
@@ -81,10 +82,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Image.asset(
-                      'assets/images/focusLogo.png',
-                      width: 500,
-                      fit: BoxFit.contain,
+                    Semantics(
+                      image: true,
+                      label: 'Logo do Focus',
+                      child: Image.asset(
+                        'assets/images/focusLogo.png',
+                        width: 500,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                     Text(
                       'Organize suas tarefas com clareza',
@@ -140,6 +145,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             icon: Icons.lock_outline_rounded,
                           ).copyWith(
                             suffixIcon: IconButton(
+                              tooltip: obscurePassword
+                                  ? 'Mostrar senha'
+                                  : 'Ocultar senha',
                               icon: Icon(
                                 obscurePassword
                                     ? Icons.visibility_outlined
@@ -179,8 +187,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         child: authVM.isLoading
-                            ? const CircularProgressIndicator(
-                                color: AppColors.onPrimary,
+                            ? Semantics(
+                                label: 'Cadastrando conta',
+                                liveRegion: true,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.onPrimary,
+                                ),
                               )
                             : const Text(
                                 'CADASTRAR',

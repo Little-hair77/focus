@@ -97,6 +97,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBarWidget(
         leading: IconButton(
+          tooltip: 'Voltar',
           icon: const Icon(
             Icons.arrow_back_ios_new,
             color: AppColors.onPrimary,
@@ -140,29 +141,50 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.05),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.assignment_outlined, size: 18, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.assignment_outlined,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(width: 8),
-                            const Text("O que será feito?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                            const Text(
+                              "O que será feito?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _titleController,
                           maxLength: 50,
-                          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null, // Oculta contador feio nativo
+                          buildCounter:
+                              (
+                                context, {
+                                required currentLength,
+                                required isFocused,
+                                maxLength,
+                              }) => null, // Oculta contador feio nativo
                           decoration: appInputDecoration(
                             context,
                             label: 'Título do objetivo',
                             icon: Icons.edit_note_rounded,
                           ),
-                          validator: (value) => value == null || value.isEmpty ? 'Insira um título para continuar' : null,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Insira um título para continuar'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -186,20 +208,33 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.05),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.tune_rounded, size: 18, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.tune_rounded,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(width: 8),
-                            const Text("Ajustes de execução", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                            const Text(
+                              "Ajustes de execução",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Dropdown Categoria
                         DropdownButtonFormField<String>(
                           value: _selectedCategoryId,
@@ -218,59 +253,102 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                               .toList(),
                           onChanged: categoryVM.isLoading
                               ? null
-                              : (value) => setState(() => _selectedCategoryId = value),
+                              : (value) =>
+                                    setState(() => _selectedCategoryId = value),
                         ),
-                        
+
                         const SizedBox(height: 16),
 
                         // Seletor de Data customizado estilo Card
-                        InkWell(
-                          onTap: _pickDate,
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: theme.scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: theme.dividerColor.withOpacity(0.08)),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.calendar_today_rounded, size: 20, color: theme.colorScheme.primary),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    _selectedDate == null
-                                        ? 'Definir data de vencimento'
-                                        : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: _selectedDate == null ? Colors.grey : theme.colorScheme.primary,
-                                      fontWeight: _selectedDate == null ? FontWeight.normal : FontWeight.bold,
+                        Semantics(
+                          button: true,
+                          label: _selectedDate == null
+                              ? 'Definir data de vencimento'
+                              : 'Data de vencimento ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
+                          child: InkWell(
+                            onTap: _pickDate,
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                                horizontal: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.scaffoldBackgroundColor,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: theme.dividerColor.withOpacity(0.08),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  ExcludeSemantics(
+                                    child: Icon(
+                                      Icons.calendar_today_rounded,
+                                      size: 20,
+                                      color: theme.colorScheme.primary,
                                     ),
                                   ),
-                                ),
-                                Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
-                              ],
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _selectedDate == null
+                                          ? 'Definir data de vencimento'
+                                          : 'Vence em: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: _selectedDate == null
+                                            ? Colors.grey
+                                            : theme.colorScheme.primary,
+                                        fontWeight: _selectedDate == null
+                                            ? FontWeight.normal
+                                            : FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ExcludeSemantics(
+                                    child: Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: Colors.grey[400],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
 
                         // Escolha de Prioridade com Chip de Feedback
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Nível de Urgência", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            const Text(
+                              "Nível de Urgência",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                             Chip(
                               label: Text(
-                                _selectedPriority == TaskPriority.high ? 'ALTA' : _selectedPriority == TaskPriority.medium ? 'MÉDIA' : 'BAIXA',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                                _selectedPriority == TaskPriority.high
+                                    ? 'ALTA'
+                                    : _selectedPriority == TaskPriority.medium
+                                    ? 'MÉDIA'
+                                    : 'BAIXA',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
                               ),
-                              backgroundColor: _getPriorityColor(_selectedPriority),
+                              backgroundColor: _getPriorityColor(
+                                _selectedPriority,
+                              ),
                               visualDensity: VisualDensity.compact,
-                            )
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -278,18 +356,33 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                           width: double.infinity,
                           child: SegmentedButton<TaskPriority>(
                             style: SegmentedButton.styleFrom(
-                              selectedBackgroundColor: theme.colorScheme.primary.withOpacity(0.12),
-                              selectedForegroundColor: theme.colorScheme.primary,
+                              selectedBackgroundColor: theme.colorScheme.primary
+                                  .withOpacity(0.12),
+                              selectedForegroundColor:
+                                  theme.colorScheme.primary,
                             ),
                             segments: const [
-                              ButtonSegment(value: TaskPriority.low, label: Text("Baixa")),
-                              ButtonSegment(value: TaskPriority.medium, label: Text("Média")),
-                              ButtonSegment(value: TaskPriority.high, label: Text("Alta")),
+                              ButtonSegment(
+                                value: TaskPriority.low,
+                                label: Text("Baixa"),
+                              ),
+                              ButtonSegment(
+                                value: TaskPriority.medium,
+                                label: Text("Média"),
+                              ),
+                              ButtonSegment(
+                                value: TaskPriority.high,
+                                label: Text("Alta"),
+                              ),
                             ],
                             selected: {_selectedPriority},
-                            onSelectionChanged: (Set<TaskPriority> newSelection) {
-                              setState(() => _selectedPriority = newSelection.first);
-                            },
+                            onSelectionChanged:
+                                (Set<TaskPriority> newSelection) {
+                                  setState(
+                                    () =>
+                                        _selectedPriority = newSelection.first,
+                                  );
+                                },
                           ),
                         ),
                       ],
@@ -316,7 +409,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                             color: theme.colorScheme.primary.withOpacity(0.25),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
                       child: ElevatedButton(
@@ -324,11 +417,18 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: const Text(
                           "SALVAR TAREFA",
-                          style: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.5),
+                          style: TextStyle(
+                            color: AppColors.onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),

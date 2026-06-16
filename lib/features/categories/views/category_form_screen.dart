@@ -77,6 +77,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBarWidget(
         leading: IconButton(
+          tooltip: 'Voltar',
           icon: const Icon(
             Icons.arrow_back_ios_new,
             color: AppColors.onPrimary,
@@ -120,18 +121,28 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.05),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.label_outline_rounded, size: 18, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.label_outline_rounded,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(width: 8),
                             const Text(
-                              "Como se chamará?", 
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                              "Como se chamará?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -139,13 +150,20 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                         TextFormField(
                           controller: _nameController,
                           maxLength: 25,
-                          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                          buildCounter:
+                              (
+                                context, {
+                                required currentLength,
+                                required isFocused,
+                                maxLength,
+                              }) => null,
                           decoration: appInputDecoration(
                             context,
                             label: 'Ex: Trabalho, Estudos, Saúde...',
                             icon: Icons.category_rounded,
                           ),
-                          validator: (value) => value == null || value.trim().isEmpty
+                          validator: (value) =>
+                              value == null || value.trim().isEmpty
                               ? 'Insira um nome para a categoria'
                               : null,
                         ),
@@ -161,7 +179,9 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.05),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,11 +191,19 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.palette_outlined, size: 18, color: theme.colorScheme.primary),
+                                Icon(
+                                  Icons.palette_outlined,
+                                  size: 18,
+                                  color: theme.colorScheme.primary,
+                                ),
                                 const SizedBox(width: 8),
                                 const Text(
-                                  "Identidade Visual", 
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                                  "Identidade Visual",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
@@ -199,43 +227,58 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                               final selected = _selectedColor == color;
                               final displayColor = CategoryPalette.parse(color);
 
-                              return InkWell(
-                                onTap: () => setState(() => _selectedColor = color),
-                                borderRadius: BorderRadius.circular(24),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 46,
-                                  height: 46,
-                                  decoration: BoxDecoration(
-                                    color: displayColor,
-                                    shape: BoxShape.circle,
-                                    boxShadow: selected
-                                        ? [
-                                            BoxShadow(
-                                              color: displayColor.withOpacity(0.4),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 2),
+                              return Semantics(
+                                button: true,
+                                selected: selected,
+                                label: selected
+                                    ? 'Cor $color selecionada'
+                                    : 'Selecionar cor $color',
+                                child: InkWell(
+                                  onTap: () =>
+                                      setState(() => _selectedColor = color),
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 46,
+                                    height: 46,
+                                    decoration: BoxDecoration(
+                                      color: displayColor,
+                                      shape: BoxShape.circle,
+                                      boxShadow: selected
+                                          ? [
+                                              BoxShadow(
+                                                color: displayColor.withOpacity(
+                                                  0.4,
+                                                ),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                      border: selected
+                                          ? Border.all(
+                                              color:
+                                                  theme.brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.white
+                                                  : theme.colorScheme.primary,
+                                              width: 3,
                                             )
-                                          ]
-                                        : null,
-                                    border: selected
-                                        ? Border.all(
-                                            color: theme.brightness == Brightness.dark
-                                                ? Colors.white
-                                                : theme.colorScheme.primary,
-                                            width: 3,
+                                          : null,
+                                    ),
+                                    child: selected
+                                        ? Icon(
+                                            Icons.check,
+                                            color:
+                                                theme.brightness ==
+                                                        Brightness.dark &&
+                                                    displayColor == Colors.white
+                                                ? Colors.black
+                                                : Colors.white,
+                                            size: 20,
                                           )
                                         : null,
                                   ),
-                                  child: selected
-                                      ? Icon(
-                                          Icons.check,
-                                          color: theme.brightness == Brightness.dark && displayColor == Colors.white
-                                              ? Colors.black
-                                              : Colors.white,
-                                          size: 20,
-                                        )
-                                      : null,
                                 ),
                               );
                             }).toList(),
@@ -265,10 +308,12 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                         boxShadow: !_isSaving
                             ? [
                                 BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(0.25),
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.25,
+                                  ),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
-                                )
+                                ),
                               ]
                             : null,
                       ),
@@ -277,19 +322,27 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: _isSaving
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
+                            ? Semantics(
+                                label: 'Salvando categoria',
+                                liveRegion: true,
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
                                 ),
                               )
                             : Text(
-                                isEditing ? 'SALVAR ALTERAÇÕES' : 'CRIAR CATEGORIA',
+                                isEditing
+                                    ? 'SALVAR ALTERAÇÕES'
+                                    : 'CRIAR CATEGORIA',
                                 style: const TextStyle(
                                   color: AppColors.onPrimary,
                                   fontWeight: FontWeight.bold,
