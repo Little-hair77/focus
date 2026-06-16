@@ -33,22 +33,24 @@ class SettingsScreen extends StatelessWidget {
         drawer: const AppDrawer(),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: const BoxConstraints(maxWidth: 1200),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Configurações',
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
                       color: theme.textTheme.titleLarge?.color,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 28),
                   AppCard(
                     child: SwitchListTile(
                       secondary: Icon(
@@ -69,7 +71,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       value: themeVM.isDarkMode,
                       activeThumbColor: theme.colorScheme.primary,
-                      onChanged: (_) => themeVM.toggleTheme(),
+                      onChanged: themeVM.setDarkMode,
                     ),
                   ),
                 ],

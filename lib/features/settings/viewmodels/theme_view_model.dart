@@ -20,8 +20,14 @@ class ThemeViewModel extends ChangeNotifier {
 
   /// Alterna o tema e salva a preferência imediatamente.
   Future<void> toggleTheme() async {
-    _isDarkMode = !_isDarkMode;
+    await setDarkMode(!_isDarkMode);
+  }
+
+  /// Define o tema escuro com o valor recebido e persiste a preferência.
+  Future<void> setDarkMode(bool value) async {
+    if (_isDarkMode == value) return;
+    _isDarkMode = value;
+    notifyListeners(); // Atualiza o app imediatamente.
     await _service.saveTheme(_isDarkMode);
-    notifyListeners(); // Notifica o app inteiro para mudar a cor
   }
 }

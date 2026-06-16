@@ -31,37 +31,38 @@ class CategoryListScreen extends StatelessWidget {
           onTrashDrop: (data) => _moveToTrash(context, data, categoryVM),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              Text(
-                'Categorias',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.titleLarge?.color,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: categoryVM.isLoading
-                    ? Semantics(
-                        label: 'Carregando categorias',
-                        liveRegion: true,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      )
-                    : categoryVM.categories.isEmpty
-                    ? const CategoryEmptyState()
-                    : Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Categorias',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: theme.textTheme.titleLarge?.color,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  Expanded(
+                    child: categoryVM.isLoading
+                        ? Semantics(
+                            label: 'Carregando categorias',
+                            liveRegion: true,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          )
+                        : categoryVM.categories.isEmpty
+                        ? const CategoryEmptyState()
+                        : ListView.separated(
                             physics: const BouncingScrollPhysics(),
                             itemCount: categoryVM.categories.length,
                             separatorBuilder: (_, _) =>
@@ -71,10 +72,10 @@ class CategoryListScreen extends StatelessWidget {
                               return CategoryCard(category: category);
                             },
                           ),
-                        ),
-                      ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(

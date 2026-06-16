@@ -17,6 +17,7 @@ class SettingsService {
   /// Carrega a preferência de tema.
   Future<bool> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     return prefs.getBool(_themeKey) ??
         false; // Retorna false (Light) por padrão
   }

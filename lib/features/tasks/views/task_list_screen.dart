@@ -59,60 +59,61 @@ class _TaskListScreenState extends State<TaskListScreen> {
           onTrashDrop: (data) => _moveToTrash(context, data, taskVM),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              Text(
-                'Minhas Tarefas',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.titleLarge?.color,
-                ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Minhas Tarefas',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: theme.textTheme.titleLarge?.color,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  TaskFilterBar(
+                    searchController: _searchController,
+                    selectedDueDate: _dueDateFilter,
+                    showByCategory: _showByCategory,
+                    onSearchChanged: (_) => setState(() {}),
+                    onPickDueDate: _pickDueDate,
+                    onClearDueDate: () => setState(() => _dueDateFilter = null),
+                    onShowByCategoryChanged: (value) =>
+                        setState(() => _showByCategory = value),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: taskVM.isLoading
+                        ? _buildLoadingState(theme)
+                        : taskVM.tasks.isEmpty
+                        ? const TaskEmptyState()
+                        : filteredTasks.isEmpty
+                        ? const TaskNoResultsState()
+                        : _showByCategory
+                        ? _buildCategorizedTaskList(
+                            filteredTasks,
+                            categoriesById,
+                            taskVM,
+                            isWideScreen,
+                            screenWidth,
+                          )
+                        : _buildTaskList(
+                            filteredTasks,
+                            categoriesById,
+                            taskVM,
+                            isWideScreen,
+                            screenWidth,
+                          ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TaskFilterBar(
-                searchController: _searchController,
-                selectedDueDate: _dueDateFilter,
-                showByCategory: _showByCategory,
-                onSearchChanged: (_) => setState(() {}),
-                onPickDueDate: _pickDueDate,
-                onClearDueDate: () => setState(() => _dueDateFilter = null),
-                onShowByCategoryChanged: (value) =>
-                    setState(() => _showByCategory = value),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: taskVM.isLoading
-                    ? _buildLoadingState(theme)
-                    : taskVM.tasks.isEmpty
-                    ? const TaskEmptyState()
-                    : filteredTasks.isEmpty
-                    ? const TaskNoResultsState()
-                    : Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: _showByCategory
-                              ? _buildCategorizedTaskList(
-                                  filteredTasks,
-                                  categoriesById,
-                                  taskVM,
-                                  isWideScreen,
-                                  screenWidth,
-                                )
-                              : _buildTaskList(
-                                  filteredTasks,
-                                  categoriesById,
-                                  taskVM,
-                                  isWideScreen,
-                                  screenWidth,
-                                ),
-                        ),
-                      ),
-              ),
-            ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
