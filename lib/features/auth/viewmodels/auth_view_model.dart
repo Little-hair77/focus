@@ -4,22 +4,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:focus/features/auth/models/user_model.dart' as app_user;
+import 'package:focus/features/auth/services/login_access_recorder.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final firebase_auth.FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final LoginAccessRecorder? _loginAccessRecorder;
   late final StreamSubscription<firebase_auth.User?> _authSubscription;
 
   bool _isLoading = false;
   bool _isInitialized = false;
+  int _accessLogVersion = 0;
   String? _errorMessage;
   app_user.User? _currentUser;
 
   AuthViewModel({
     firebase_auth.FirebaseAuth? auth,
     FirebaseFirestore? firestore,
+    LoginAccessRecorder? loginAccessRecorder,
   }) : _auth = auth ?? firebase_auth.FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance {
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _loginAccessRecorder = loginAccessRecorder {
     _authSubscription = _auth.authStateChanges().listen(
       _handleAuthChanged,
       onError: (Object error) {
@@ -35,16 +40,30 @@ class AuthViewModel extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   bool get isLoggedIn => _currentUser != null;
   String? get errorMessage => _errorMessage;
+  int get accessLogVersion => _accessLogVersion;
   app_user.User? get currentUser => _currentUser;
   String? get userName => _currentUser?.name;
   String? get userEmail => _currentUser?.email;
 
   Future<bool> login(String email, String password) async {
     return _runAuthAction(() async {
-      await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) {
+        throw StateError('Usuário não retornado após o login.');
+      }
+
+      try {
+        await _loginAccessRecorder?.record(firebaseUser.uid);
+        if (_loginAccessRecorder != null) {
+          _accessLogVersion++;
+        }
+      } catch (error) {
+        debugPrint('Não foi possível registrar a auditoria do login: $error');
+      }
     });
   }
 

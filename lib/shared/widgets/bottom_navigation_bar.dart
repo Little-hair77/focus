@@ -18,30 +18,48 @@ class AppBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final handleTap = onTap ?? (index) => _navigate(context, index);
 
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap ?? (index) => _navigate(context, index),
-      selectedItemColor: isDark
-          ? AppColors.darkTextHighEmphasis
-          : theme.colorScheme.primary,
-      unselectedItemColor: isDark
-          ? AppColors.darkTextMediumEmphasis
-          : AppColors.textMediumEmphasis,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.checklist_rounded),
-          label: 'Tarefas',
+    return Stack(
+      children: [
+        BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: handleTap,
+          selectedItemColor: isDark
+              ? AppColors.darkTextHighEmphasis
+              : theme.colorScheme.primary,
+          unselectedItemColor: isDark
+              ? AppColors.darkTextMediumEmphasis
+              : AppColors.textMediumEmphasis,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.checklist_rounded),
+              label: 'Tarefas',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category),
+              label: 'Categorias',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.delete_outline),
+              label: 'Lixeira',
+            ),
+          ],
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.category),
-          label: 'Categorias',
-        ),
-        BottomNavigationBarItem(
-          icon: _TrashDropTarget(onAccept: onTrashDrop),
-          label: 'Lixeira',
+        Positioned.fill(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: FractionallySizedBox(
+              widthFactor: 0.25,
+              heightFactor: 1,
+              child: _TrashDropTarget(
+                onAccept: onTrashDrop,
+                onTap: () => handleTap(3),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -57,8 +75,9 @@ class AppBottomNavigationBar extends StatelessWidget {
 
 class _TrashDropTarget extends StatefulWidget {
   final ValueChanged<TrashDragData>? onAccept;
+  final VoidCallback onTap;
 
-  const _TrashDropTarget({this.onAccept});
+  const _TrashDropTarget({this.onAccept, required this.onTap});
 
   @override
   State<_TrashDropTarget> createState() => _TrashDropTargetState();
@@ -70,6 +89,7 @@ class _TrashDropTargetState extends State<_TrashDropTarget> {
   @override
   Widget build(BuildContext context) {
     return DragTarget<TrashDragData>(
+      key: const ValueKey('trash-drop-target'),
       onWillAcceptWithDetails: (_) {
         setState(() => _isHovering = true);
         return widget.onAccept != null;
@@ -80,11 +100,14 @@ class _TrashDropTargetState extends State<_TrashDropTarget> {
         widget.onAccept?.call(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return AnimatedScale(
-          duration: const Duration(milliseconds: 150),
-          scale: _isHovering ? 1.35 : 1,
-          child: Icon(
-            _isHovering ? Icons.delete_forever : Icons.delete_outline,
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            color: _isHovering
+                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.12)
+                : Colors.transparent,
           ),
         );
       },
