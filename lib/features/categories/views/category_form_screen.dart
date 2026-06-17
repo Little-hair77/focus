@@ -19,7 +19,6 @@ class CategoryFormScreen extends StatefulWidget {
   State<CategoryFormScreen> createState() => _CategoryFormScreenState();
 }
 
-/// Estado do formulário de categoria.
 class _CategoryFormScreenState extends State<CategoryFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
@@ -31,6 +30,8 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name);
     _selectedColor = widget.category?.color ?? CategoryPalette.fallback;
+    
+    _nameController.addListener(() => setState(() {}));
   }
 
   @override
@@ -39,7 +40,6 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     super.dispose();
   }
 
-  /// Persiste a categoria criada ou editada.
   Future<void> _saveCategory() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -66,7 +66,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(categoryVM.errorMessage ?? 'Erro ao salvar.')),
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Text(categoryVM.errorMessage ?? 'Erro ao salvar.'),
+      ),
     );
   }
 
@@ -77,6 +81,8 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = screenWidth > 600;
 
+    final currentPreviewColor = CategoryPalette.parse(_selectedColor);
+
     return AppGestureNavigation(
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -85,7 +91,6 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
             tooltip: 'Voltar',
             icon: const Icon(
               Icons.arrow_back_ios_new,
-              color: AppColors.onPrimary,
               size: 20,
             ),
             onPressed: () => Navigator.pop(context),
@@ -98,36 +103,45 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
             ),
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Títulos principais alinhados com o padrão do app
+                    // TÍTULOS PRINCIPAIS
                     Text(
                       isEditing ? 'Ajustar Categoria' : 'Nova Categoria',
-                      style: TextStyle(
-                        fontSize: 24,
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: theme.textTheme.titleLarge?.color,
-                        letterSpacing: -0.5,
+                        letterSpacing: -0.8,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       "Agrupe suas tarefas para manter o foco por nicho.",
                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
 
-                    // Identificação (CONTAINER CLEAN)
+                    //  PRÉ-VISUALIZAÇÃO EM TEMPO REAL (Live Preview Card)
+                    const Text(
+                      "PRÉ-VISUALIZAÇÃO",
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildLivePreviewCard(_nameController.text, currentPreviewColor, theme),
+                    const SizedBox(height: 28),
+
+                    // CAMPO DE IDENTIFICAÇÃO 
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: theme.dividerColor.withValues(alpha: 0.05),
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                          width: 1.5,
                         ),
                       ),
                       child: Column(
@@ -135,19 +149,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.label_outline_rounded,
-                                size: 18,
-                                color: theme.colorScheme.primary,
-                              ),
+                              Icon(Icons.label_outline_rounded, size: 18, color: theme.colorScheme.primary),
                               const SizedBox(width: 8),
                               const Text(
                                 "Como se chamará?",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Colors.grey,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -155,136 +161,94 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                           TextFormField(
                             controller: _nameController,
                             maxLength: 25,
-                            buildCounter:
-                                (
-                                  context, {
-                                  required currentLength,
-                                  required isFocused,
-                                  maxLength,
-                                }) => null,
+                            buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                             decoration: appInputDecoration(
                               context,
                               label: 'Ex: Trabalho, Estudos, Saúde...',
-                              icon: Icons.category_rounded,
+                              icon: Icons.edit_rounded,
                             ),
-                            validator: (value) =>
-                                value == null || value.trim().isEmpty
+                            validator: (value) => value == null || value.trim().isEmpty
                                 ? 'Insira um nome para a categoria'
                                 : null,
                           ),
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 20),
 
-                    // Paleta de Cores Visual
+                    // PALETA DE CORES VISUAL
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: theme.dividerColor.withValues(alpha: 0.05),
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                          width: 1.5,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.palette_outlined,
-                                    size: 18,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    "Identidade Visual",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              // Indicador reativo da cor escolhida
-                              Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: CategoryPalette.parse(_selectedColor),
-                                  shape: BoxShape.circle,
-                                ),
+                              Icon(Icons.palette_outlined, size: 18, color: theme.colorScheme.primary),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Identidade Visual",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           Center(
                             child: Wrap(
                               spacing: 14,
                               runSpacing: 14,
                               children: CategoryPalette.colors.map((color) {
                                 final selected = _selectedColor == color;
-                                final displayColor = CategoryPalette.parse(
-                                  color,
-                                );
+                                final displayColor = CategoryPalette.parse(color);
 
                                 return Semantics(
                                   button: true,
                                   selected: selected,
-                                  label: selected
-                                      ? 'Cor $color selecionada'
-                                      : 'Selecionar cor $color',
+                                  label: selected ? 'Cor $color selecionada' : 'Selecionar cor $color',
                                   child: InkWell(
-                                    onTap: () =>
-                                        setState(() => _selectedColor = color),
+                                    onTap: () => setState(() => _selectedColor = color),
                                     borderRadius: BorderRadius.circular(24),
                                     child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 200,
-                                      ),
-                                      width: 46,
-                                      height: 46,
+                                      duration: const Duration(milliseconds: 200),
+                                      width: 44,
+                                      height: 44,
                                       decoration: BoxDecoration(
                                         color: displayColor,
                                         shape: BoxShape.circle,
                                         boxShadow: selected
                                             ? [
                                                 BoxShadow(
-                                                  color: displayColor
-                                                      .withValues(alpha: 0.4),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
+                                                  color: displayColor.withValues(alpha: 0.35),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 4),
                                                 ),
                                               ]
                                             : null,
                                         border: selected
                                             ? Border.all(
-                                                color:
-                                                    theme.brightness ==
-                                                        Brightness.dark
-                                                    ? Colors.white
-                                                    : theme.colorScheme.primary,
+                                                color: theme.brightness == Brightness.dark ? Colors.white : Colors.black87,
                                                 width: 3,
                                               )
-                                            : null,
+                                            : Border.all(
+                                                color: Colors.transparent,
+                                                width: 0,
+                                              ),
                                       ),
                                       child: selected
                                           ? Icon(
                                               Icons.check,
-                                              color:
-                                                  theme.brightness ==
-                                                          Brightness.dark &&
-                                                      displayColor ==
-                                                          Colors.white
+                                              color: theme.brightness == Brightness.dark && displayColor == Colors.white
                                                   ? Colors.black
                                                   : Colors.white,
-                                              size: 20,
+                                              size: 18,
                                             )
                                           : null,
                                     ),
@@ -296,10 +260,9 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 36),
 
-                    const SizedBox(height: 32),
-
-                    // Botão de Confirmação com Gradiente e Feedback de Saving
+                    // BOTÃO DE CONFIRMAÇÃO GRADIENTE
                     Center(
                       child: Container(
                         width: isWideScreen ? 350 : double.infinity,
@@ -308,20 +271,16 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
                             colors: _isSaving
-                                ? [Colors.grey, Colors.grey[400]!]
+                                ? [Colors.grey, Colors.grey]
                                 : [
                                     theme.colorScheme.primary,
-                                    theme.colorScheme.secondary.withValues(
-                                      alpha: 0.85,
-                                    ),
+                                    theme.colorScheme.primary.withValues(alpha: 0.8),
                                   ],
                           ),
                           boxShadow: !_isSaving
                               ? [
                                   BoxShadow(
-                                    color: theme.colorScheme.primary.withValues(
-                                      alpha: 0.25,
-                                    ),
+                                    color: theme.colorScheme.primary.withValues(alpha: 0.25),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -341,7 +300,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                               ? Semantics(
                                   label: 'Salvando categoria',
                                   liveRegion: true,
-                                  child: SizedBox(
+                                  child: const SizedBox(
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
@@ -351,13 +310,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                                   ),
                                 )
                               : Text(
-                                  isEditing
-                                      ? 'SALVAR ALTERAÇÕES'
-                                      : 'CRIAR CATEGORIA',
+                                  isEditing ? 'SALVAR ALTERAÇÕES' : 'CRIAR CATEGORIA',
                                   style: const TextStyle(
                                     color: AppColors.onPrimary,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
@@ -370,6 +327,59 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// CONSTRUTOR DO LIVE PREVIEW CARD 
+  Widget _buildLivePreviewCard(String text, Color color, ThemeData theme) {
+    final cleanText = text.trim().isEmpty ? 'Nome da Categoria' : text;
+    return Container(
+      width: 180, 
+      height: 110,
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.folder_rounded, color: color, size: 22),
+              ),
+              const Icon(Icons.more_vert_rounded, size: 18, color: Colors.grey),
+            ],
+          ),
+          Text(
+            cleanText,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: text.trim().isEmpty ? Colors.grey : theme.textTheme.bodyLarge?.color,
+              height: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }
