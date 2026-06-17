@@ -4,15 +4,14 @@ import 'package:focus/shared/utils/logout.dart';
 import 'package:focus/shared/widgets/app_version.dart';
 import 'package:provider/provider.dart';
 
-/// Drawer lateral customizado com navegação, gerenciamento de tema e dados da conta.
+/// Drawer lateral customizado com navegação e dados da conta.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
+
     final authVM = context.watch<AuthViewModel>();
     final userName = authVM.userName ?? 'Usuário';
     final userEmail = authVM.userEmail ?? '';
@@ -117,27 +116,6 @@ class AppDrawer extends StatelessWidget {
                   ),
                   
                   _buildSectionHeader('Preferências'),
-
-                  // ALTERNADOR DE TEMA INTERATIVO
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: SwitchListTile(
-                      secondary: Icon(
-                        isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                        color: isDark ? Colors.purpleAccent : Colors.orange,
-                      ),
-                      title: Text(
-                        isDark ? 'Modo Escuro' : 'Modo Claro',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                      value: isDark,
-                      activeColor: theme.colorScheme.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      onChanged: (bool value) {
-                        // TODO: Inserir a lógica de toggleTheme do seu Provider aqui
-                      },
-                    ),
-                  ),
 
                   _buildDrawerItem(
                     icon: Icons.settings_outlined,
