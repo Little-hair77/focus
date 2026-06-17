@@ -36,6 +36,7 @@ import 'package:focus/features/focus/views/focus_mode_screen.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 import 'package:focus/features/profile/view/profile_screen.dart';
 import 'package:focus/shared/utils/navigation.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 /// Inicializa Firebase, repositórios e providers globais.
 void main() async {
@@ -57,7 +58,8 @@ void main() async {
 
   final themeViewModel = ThemeViewModel();
   await themeViewModel.loadSettings();
-
+  await initializeDateFormatting('pt-BR', null);
+  
   runApp(
     MultiProvider(
       providers: [
