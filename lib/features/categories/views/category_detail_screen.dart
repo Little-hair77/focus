@@ -8,6 +8,7 @@ import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+/// Tela de detalhes completos de uma categoria.
 class CategoryDetailScreen extends StatelessWidget {
   final Category category;
 
@@ -23,6 +24,17 @@ class CategoryDetailScreen extends StatelessWidget {
 
     final completedTasksCount = categoryTasks.where((task) => task.status == TaskStatus.done).length;
     final pendingTasksCount = categoryTasks.length - completedTasksCount;
+
+    IconData categoryIcon = Icons.folder_open_rounded; 
+    if (category.icon != null) {
+      try {
+        final intCodePoint = int.parse(category.icon!);
+        categoryIcon = IconData(intCodePoint, fontFamily: 'MaterialIcons');
+      } catch (_) {
+        // Fallback caso seja um dado antigo do banco
+        categoryIcon = Icons.folder_open_rounded;
+      }
+    }
 
     return AppGestureNavigation(
       child: Scaffold(
@@ -46,6 +58,7 @@ class CategoryDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Ícone Dinâmico + Título
                   Row(
                     children: [
                       Container(
@@ -59,7 +72,7 @@ class CategoryDetailScreen extends StatelessWidget {
                           ),
                         ),
                         child: Icon(
-                          Icons.folder_open_rounded,
+                          categoryIcon, 
                           color: primaryColor,
                           size: 40,
                         ),
@@ -91,6 +104,7 @@ class CategoryDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
+                  // VISÃO GERAL / MÉTRICAS
                   Text(
                     'Desempenho da Categoria',
                     style: theme.textTheme.titleSmall?.copyWith(
@@ -136,7 +150,6 @@ class CategoryDetailScreen extends StatelessWidget {
                       if (categoryTasks.isNotEmpty)
                         TextButton(
                           onPressed: () {
-                            // Direciona para a lista geral passando o filtro se necessário
                             Navigator.pushNamed(context, '/tasks', arguments: category.id);
                           },
                           child: Text(
@@ -151,7 +164,6 @@ class CategoryDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // RENDERIZAÇÃO CONDICIONAL DA LISTA DE TAREFAS REAIS
                   if (categoryTasks.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -163,9 +175,8 @@ class CategoryDetailScreen extends StatelessWidget {
                       ),
                     )
                   else
-                    // Lista dinamicamente as tarefas encontradas para o ID desta categoria
                     ListView.builder(
-                      shrinkWrap: true, // Garante que a lista não ocupe espaço infinito
+                      shrinkWrap: true, 
                       physics: const NeverScrollableScrollPhysics(), 
                       itemCount: categoryTasks.length > 5 ? 5 : categoryTasks.length, 
                       itemBuilder: (context, index) {

@@ -15,25 +15,6 @@ import 'package:provider/provider.dart';
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
 
-  /// MAPEAMENTO DINÂMICO DE ÍCONES E CORES BASEADO NO NOME DA CATEGORIA
-  Map<String, dynamic> _getCategoryStyle(String name) {
-    final lowerName = name.toLowerCase();
-    if (lowerName.contains('trabalho') || lowerName.contains('job') || lowerName.contains('trampo')) {
-      return {'icon': Icons.business_center_rounded, 'color': Colors.blue};
-    } else if (lowerName.contains('estudo') || lowerName.contains('faculdade') || lowerName.contains('escola') || lowerName.contains('aee')) {
-      return {'icon': Icons.school_rounded, 'color': Colors.purple};
-    } else if (lowerName.contains('saude') || lowerName.contains('academia') || lowerName.contains('treino') || lowerName.contains('medico')) {
-      return {'icon': Icons.favorite_rounded, 'color': Colors.redAccent};
-    } else if (lowerName.contains('finança') || lowerName.contains('dinheiro') || lowerName.contains('pagamento') || lowerName.contains('conta')) {
-      return {'icon': Icons.payments_rounded, 'color': Colors.green};
-    } else if (lowerName.contains('pessoal') || lowerName.contains('casa') || lowerName.contains('rotina')) {
-      return {'icon': Icons.home_rounded, 'color': Colors.orange};
-    } else if (lowerName.contains('lazer') || lowerName.contains('viagem') || lowerName.contains('hobby')) {
-      return {'icon': Icons.sports_esports_rounded, 'color': Colors.teal};
-    }
-    return {'icon': Icons.folder_special_rounded, 'color': Colors.blueGrey};
-  }
-
   @override
   Widget build(BuildContext context) {
     final categoryVM = context.watch<CategoryViewModel>();
@@ -117,9 +98,18 @@ class CategoryListScreen extends StatelessWidget {
                                   itemCount: categoryVM.categories.length,
                                   itemBuilder: (context, index) {
                                     final category = categoryVM.categories[index];
-                                    final style = _getCategoryStyle(category.name);
-                                    final Color catColor = style['color'];
-                                    final IconData catIcon = style['icon'];
+                                    
+                                    // REALOCAÇÃO REATIVA DA COR SALVA NO BANCO
+                                    final Color catColor = category.displayColor;
+
+                                    // CONVERSÃO REAL DO ÍCONE ARMAZENADO EM STRING
+                                    IconData catIcon = Icons.folder_rounded; // Fallback
+                                    if (category.icon != null) {
+                                      final int? codePoint = int.tryParse(category.icon!);
+                                      if (codePoint != null) {
+                                        catIcon = IconData(codePoint, fontFamily: 'MaterialIcons');
+                                      }
+                                    }
 
                                     return Draggable<TrashDragData>(
                                       data: TrashDragData(id: category.id, type: TrashItemType.category),
@@ -174,7 +164,7 @@ class CategoryListScreen extends StatelessWidget {
     );
   }
 
-  ///  CONSTRUTOR DE CARTÃO PREMIUM COM REDIRECIONAMENTO CORRIGIDO
+  /// CONSTRUTOR DE CARTÃO PREMIUM
   Widget _buildCategoryCard(BuildContext context, dynamic category, Color color, IconData icon, ThemeData theme) {
     return InkWell(
       onTap: () {
