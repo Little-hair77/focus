@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 
+/// Define os temas globais da aplicação.
 class AppTheme {
+  /// Tema claro usado quando o usuário não ativa o modo escuro.
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -26,6 +28,7 @@ class AppTheme {
     );
   }
 
+  /// Tema escuro usado quando o usuário ativa o modo escuro.
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -47,6 +50,7 @@ class AppTheme {
     );
   }
 
+  /// Cria o padrão visual compartilhado para cards.
   static CardThemeData _cardTheme(Color color) {
     return CardThemeData(
       color: color,
@@ -55,6 +59,7 @@ class AppTheme {
     );
   }
 
+  /// Cria o padrão visual compartilhado para campos de entrada.
   static InputDecorationTheme _inputDecorationTheme(Color primary) {
     final borderRadius = BorderRadius.circular(16);
     return InputDecorationTheme(

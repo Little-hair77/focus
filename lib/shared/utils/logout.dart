@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
+/// Realiza logout e volta para a tela de login.
 Future<void> logout(BuildContext context, AuthViewModel authVM) async {
   await authVM.logout();
   if (!context.mounted) return;

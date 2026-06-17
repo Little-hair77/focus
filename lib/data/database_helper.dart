@@ -1,19 +1,24 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+/// Gerencia a criação, migração e acesso ao banco SQLite local.
 class DatabaseHelper {
+  /// Instância única usada pelos repositórios SQLite.
   static final DatabaseHelper instance = DatabaseHelper._init();
+
+  /// Banco em cache para evitar múltiplas aberturas.
   static Database? _database;
 
   DatabaseHelper._init();
 
-  // Getter que verifica se o banco já existe ou se precisa ser criado
+  /// Retorna o banco aberto ou cria a instância quando necessário.
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('focus.db');
     return _database!;
   }
 
+  /// Inicializa o arquivo físico do banco.
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
@@ -27,7 +32,7 @@ class DatabaseHelper {
     );
   }
 
-  // Scripts de criação extraídos de acordo com a documentação
+  /// Cria as tabelas iniciais do banco.
   Future _createDB(Database db, int version) async {
     // Tabela de Categorias
     await db.execute('''
@@ -61,6 +66,7 @@ class DatabaseHelper {
     ''');
   }
 
+  /// Aplica migrações incrementais entre versões do banco.
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE categories ADD COLUMN deleted_at TEXT');
@@ -68,7 +74,7 @@ class DatabaseHelper {
     }
   }
 
-  // Método para fechar o banco com segurança
+  /// Fecha o banco local com segurança.
   Future close() async {
     final db = await instance.database;
     db.close();

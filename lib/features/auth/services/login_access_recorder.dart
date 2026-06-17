@@ -5,11 +5,21 @@ import 'package:focus/data/repositories/location/contracts/location_repository.d
 import 'package:focus/features/profile/models/access_log.dart';
 import 'package:uuid/uuid.dart';
 
+/// Registra auditoria de login com data e localização quando disponível.
 class LoginAccessRecorder {
+  /// Serviço responsável por permissões do dispositivo.
   final PermissionService _permissionService;
+
+  /// Repositório usado para obter a localização atual.
   final LocationRepository _locationRepository;
+
+  /// Repositório usado para persistir o acesso.
   final AccessLogRepository _accessLogRepository;
+
+  /// Gerador de identificadores dos registros.
   final Uuid _uuid;
+
+  /// Relógio injetável para facilitar testes.
   final DateTime Function() _now;
 
   LoginAccessRecorder({
@@ -24,6 +34,7 @@ class LoginAccessRecorder {
        _uuid = uuid,
        _now = now ?? DateTime.now;
 
+  /// Registra um acesso para o usuário informado.
   Future<void> record(String userId) async {
     final accessedAt = _now();
     double? latitude;

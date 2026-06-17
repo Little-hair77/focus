@@ -11,6 +11,7 @@ import 'package:focus/core/theme/app_theme.dart';
 import 'package:focus/features/tasks/views/dashboard_screen.dart';
 import 'package:focus/features/tasks/views/task_list_screen.dart';
 import 'package:focus/features/settings/viewmodels/theme_view_model.dart';
+import 'package:focus/features/settings/views/settings_screen.dart';
 import 'package:focus/features/tasks/viewmodels/task_view_model.dart';
 import 'package:focus/data/repositories/task_repository.dart';
 import 'package:focus/data/repositories/firebase_task_repository.dart';
@@ -34,7 +35,9 @@ import 'package:focus/features/focus/viewmodels/focus_view_model.dart';
 import 'package:focus/features/focus/views/focus_mode_screen.dart';
 import 'package:focus/features/profile/viewmodels/profile_view_model.dart';
 import 'package:focus/features/profile/view/profile_screen.dart';
+import 'package:focus/shared/utils/navigation.dart';
 
+/// Inicializa Firebase, repositórios e providers globais.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -130,6 +133,7 @@ void main() async {
   );
 }
 
+/// Widget raiz que define tema, rotas e providers visíveis ao app.
 class FocusApp extends StatelessWidget {
   const FocusApp({super.key});
 
@@ -145,24 +149,38 @@ class FocusApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
 
-      routes: {
-        '/register': (context) => RegisterPage(),
-        '/login': (context) => LoginPage(),
-        '/home': (context) =>
-            const AuthGate(authenticatedScreen: DashboardScreen()),
-        '/tasks': (context) =>
-            const AuthGate(authenticatedScreen: TaskListScreen()),
-        '/categories': (context) =>
-            const AuthGate(authenticatedScreen: CategoryListScreen()),
-        '/trash': (context) =>
-            const AuthGate(authenticatedScreen: TrashScreen()),
-        '/focus': (context) =>
-            const AuthGate(authenticatedScreen: FocusModeScreen()),
-        '/profile': (context) =>
-            const AuthGate(authenticatedScreen: ProfileScreen()),
-      },
-
+      onGenerateRoute: _onGenerateRoute,
       home: const AuthGate(authenticatedScreen: DashboardScreen()),
     );
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final Widget? page = switch (settings.name) {
+      '/register' => const RegisterPage(),
+      '/login' => const LoginPage(),
+      '/home' => const AuthGate(authenticatedScreen: DashboardScreen()),
+      '/tasks' => const AuthGate(authenticatedScreen: TaskListScreen()),
+      '/categories' => const AuthGate(
+        authenticatedScreen: CategoryListScreen(),
+      ),
+      '/trash' => const AuthGate(authenticatedScreen: TrashScreen()),
+      '/focus' => const AuthGate(authenticatedScreen: FocusModeScreen()),
+      '/profile' => const AuthGate(authenticatedScreen: ProfileScreen()),
+      '/settings' => const AuthGate(authenticatedScreen: SettingsScreen()),
+      _ => null,
+    };
+
+    if (page == null) return null;
+
+    if (appTabRoutes.contains(settings.name)) {
+      return PageRouteBuilder<void>(
+        settings: settings,
+        pageBuilder: (_, _, _) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      );
+    }
+
+    return MaterialPageRoute<void>(settings: settings, builder: (_) => page);
   }
 }

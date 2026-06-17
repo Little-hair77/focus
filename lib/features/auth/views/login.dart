@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/widgets/app_input_decoration.dart';
+import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
+/// Tela de login por e-mail e senha.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,6 +13,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// Estado do formulário de login.
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -25,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Valida o formulário e tenta autenticar o usuário.
   Future<void> _efetuarLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -57,172 +61,184 @@ class _LoginPageState extends State<LoginPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Row(
-          children: [
-            // COLUNA DA ESQUERDA: Só aparece em telas grandes (Desktop)
-            if (isDesktop)
-              Expanded(
-                flex: 1,
-                child: Container(
-                  color: theme.colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/focusLogo2.png',
-                        width: 500,
-                        height: 500,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Centralize seus objetivos, maximize seus resultados.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.onPrimary,
-                          fontSize: 15,
+    return AppGestureNavigation(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Row(
+            children: [
+              // COLUNA DA ESQUERDA: Só aparece em telas grandes (Desktop)
+              if (isDesktop)
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    color: theme.colorScheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Semantics(
+                          image: true,
+                          label: 'Logo do Focus',
+                          child: Image.asset(
+                            'assets/images/focusLogo2.png',
+                            width: 500,
+                            height: 500,
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Centralize seus objetivos, maximize seus resultados.',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: AppColors.onPrimary,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-            // COLUNA DA DIREITA: Formulário de Login (Mobile e Desktop)
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32.0,
-                    vertical: 24.0,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (!isDesktop) ...[
-                            Image.asset(
-                              'assets/images/focusLogo.png',
-                              width: 500,
-                              fit: BoxFit.contain,
-                            ),
-                            Transform.translate(
-                              offset: const Offset(0, -10),
-                              child: Text(
-                                'Organize suas tarefas com clareza',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textMediumEmphasis,
-                                  fontWeight: FontWeight.w500,
+              // COLUNA DA DIREITA: Formulário de Login (Mobile e Desktop)
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                      vertical: 24.0,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (!isDesktop) ...[
+                              Semantics(
+                                image: true,
+                                label: 'Logo do Focus',
+                                child: Image.asset(
+                                  'assets/images/focusLogo.png',
+                                  width: 500,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-
-                          if (isDesktop) ...[
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Boas-vindas de volta!',
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              // O texto agora usa uma transformação leve para subir e anular o padding da imagem
+                              Transform.translate(
+                                offset: const Offset(0, -10),
+                                child: Text(
+                                  'Organize suas tarefas com clareza',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textMediumEmphasis,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(height: 24),
+                            ],
+
+                            if (isDesktop) ...[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Boas-vindas de volta!',
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+
+                            // Input de Email
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: appInputDecoration(
+                                context,
+                                label: 'Email',
+                                icon: Icons.email_outlined,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Digite seu email';
+                                }
+                                if (!value.contains('@')) {
+                                  return 'Email inválido';
+                                }
+                                return null;
+                              },
                             ),
+
+                            const SizedBox(height: 20),
+
+                            // Input de Senha
+                            TextFormField(
+                              controller: _senhaController,
+                              obscureText: obscurePassword,
+                              decoration:
+                                  appInputDecoration(
+                                    context,
+                                    label: 'Senha',
+                                    icon: Icons.lock_outline_rounded,
+                                  ).copyWith(
+                                    suffixIcon: IconButton(
+                                      tooltip: obscurePassword
+                                          ? 'Mostrar senha'
+                                          : 'Ocultar senha',
+                                      icon: Icon(
+                                        obscurePassword
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                      ),
+                                      onPressed: () => setState(
+                                        () =>
+                                            obscurePassword = !obscurePassword,
+                                      ),
+                                    ),
+                                  ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Digite sua senha';
+                                }
+                                if (value.length < 6) {
+                                  return 'A senha deve ter no mínimo 6 caracteres';
+                                }
+                                return null;
+                              },
+                            ),
+
                             const SizedBox(height: 32),
-                          ],
 
-                          // Input de Email
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: appInputDecoration(
-                              context,
-                              label: 'Email',
-                              icon: Icons.email_outlined,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Digite seu email';
-                              }
-                              if (!value.contains('@')) return 'Email inválido';
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Input de Senha
-                          TextFormField(
-                            controller: _senhaController,
-                            obscureText: obscurePassword,
-                            decoration: appInputDecoration(
-                              context,
-                              label: 'Senha',
-                              icon: Icons.lock_outline_rounded,
-                            ).copyWith(
-                              // Adicionado Semantics dinâmico no alternador de senha
-                              suffixIcon: Semantics(
-                                label: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
-                                hint: 'Toque duas vezes para alternar a visibilidade da senha',
-                                button: true,
-                                child: IconButton(
-                                  icon: Icon(
-                                    obscurePassword
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                  ),
-                                  onPressed: () => setState(
-                                    () => obscurePassword = !obscurePassword,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Digite sua senha';
-                              }
-                              if (value.length < 6) {
-                                return 'A senha deve ter no mínimo 6 caracteres';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          // Botão de Entrar
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            // Envelopado em Semantics descritivo
-                            child: Semantics(
-                              label: 'Entrar no aplicativo',
-                              hint: 'Confirma as credenciais informadas e realiza o login',
-                              button: true,
+                            // Botão de Entrar com gradiente dinâmico
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
                               child: ElevatedButton(
-                                onPressed: authVM.isLoading ? null : _efetuarLogin,
+                                onPressed: authVM.isLoading
+                                    ? null
+                                    : _efetuarLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: theme.colorScheme.onPrimary,
-                                  elevation: 2,
+                                  elevation:
+                                      2, // Uma leve sombra para dar profundidade
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
                                 child: authVM.isLoading
-                                    ? const CircularProgressIndicator(
-                                        color: AppColors.onPrimary,
+                                    ? Semantics(
+                                        label: 'Entrando',
+                                        liveRegion: true,
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.onPrimary,
+                                        ),
                                       )
                                     : const Text(
                                         'ENTRAR',
@@ -234,17 +250,10 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                               ),
                             ),
-                          ),
 
-                          const SizedBox(height: 24),
+                            const SizedBox(height: 24),
 
-                          // Botão Criar Conta
-                          // Adicionado Semantics de navegação no link de registro
-                          Semantics(
-                            label: 'Ir para tela de cadastro',
-                            hint: 'Abre o formulário para criar uma nova conta no Focus',
-                            button: true,
-                            child: TextButton(
+                            TextButton(
                               onPressed: () {
                                 Navigator.pushNamed(context, '/register');
                               },
@@ -256,15 +265,15 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

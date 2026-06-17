@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Cria a decoração padrão usada nos campos de formulário do app.
 InputDecoration appInputDecoration(
   BuildContext context, {
   required String label,
@@ -8,6 +9,8 @@ InputDecoration appInputDecoration(
   final primary = Theme.of(context).colorScheme.primary;
   return InputDecoration(
     labelText: label,
-    prefixIcon: Icon(icon, color: primary.withValues(alpha: 0.7)),
+    prefixIcon: ExcludeSemantics(
+      child: Icon(icon, color: primary.withValues(alpha: 0.7)),
+    ),
   );
 }

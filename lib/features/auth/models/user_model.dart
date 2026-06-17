@@ -1,8 +1,18 @@
+/// Representa o usuário autenticado dentro da aplicação.
 class User {
+  /// Identificador único do usuário.
   final String id;
+
+  /// Nome exibido nas telas do app.
   final String name;
+
+  /// E-mail usado para login.
   final String email;
+
+  /// URL remota da foto de perfil, quando disponível.
   final String? photoUrl;
+
+  /// Data em que a conta foi criada.
   final DateTime createdAt;
 
   const User({
@@ -13,7 +23,7 @@ class User {
     required this.createdAt,
   });
 
-  // Converter User -> Map
+  /// Converte o usuário para um mapa persistível.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -24,7 +34,7 @@ class User {
     };
   }
 
-  // Converter Map -> User
+  /// Cria um usuário a partir dos dados persistidos.
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['id'] ?? '',

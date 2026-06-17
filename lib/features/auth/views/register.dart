@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/shared/widgets/app_input_decoration.dart';
+import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:focus/features/auth/viewmodels/auth_view_model.dart';
 
+/// Tela de cadastro por nome, e-mail e senha.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -11,6 +13,7 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+/// Estado do formulário de cadastro.
 class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -26,6 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  /// Valida o formulário e tenta criar uma nova conta.
   Future<void> _efetuarCadastro() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -57,16 +61,14 @@ class _RegisterPageState extends State<RegisterPage> {
     final theme = Theme.of(context);
     final authVM = context.watch<AuthViewModel>();
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.transparent,
-        elevation: 0,
-        leading: Semantics(
-          label: 'Voltar para a tela de login',
-          hint: 'Retorna ao formulário de autenticação anterior',
-          button: true,
-          child: IconButton(
+    return AppGestureNavigation(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: AppColors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            tooltip: 'Voltar',
             icon: Icon(
               Icons.arrow_back_ios_new,
               color: theme.colorScheme.primary,
@@ -74,115 +76,112 @@ class _RegisterPageState extends State<RegisterPage> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Image.asset(
-                      'assets/images/focusLogo.png',
-                      width: 500,
-                      fit: BoxFit.contain,
-                    ),
-                    Text(
-                      'Organize suas tarefas com clareza',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Criar Conta',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Semantics(
+                        image: true,
+                        label: 'Logo do Focus',
+                        child: Image.asset(
+                          'assets/images/focusLogo.png',
+                          width: 500,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 40),
-
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: appInputDecoration(
-                        context,
-                        label: 'Nome',
-                        icon: Icons.person_outline,
+                      Text(
+                        'Organize suas tarefas com clareza',
+                        style: theme.textTheme.bodyMedium,
                       ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Digite seu nome'
-                          : null,
-                    ),
-                    const SizedBox(height: 20),
-
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: appInputDecoration(
-                        context,
-                        label: 'Email',
-                        icon: Icons.email_outlined,
+                      const SizedBox(height: 20),
+                      Text(
+                        'Criar Conta',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Digite seu email';
-                        }
-                        if (!value.contains('@')) return 'Email inválido';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 40),
 
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: obscurePassword,
-                      decoration: appInputDecoration(
-                        context,
-                        label: 'Senha',
-                        icon: Icons.lock_outline_rounded,
-                      ).copyWith(
-                        suffixIcon: Semantics(
-                          label: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
-                          hint: 'Toque duas vezes para alternar a visibilidade dos caracteres',
-                          button: true,
-                          child: IconButton(
-                            icon: Icon(
-                              obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: appInputDecoration(
+                          context,
+                          label: 'Nome',
+                          icon: Icons.person_outline,
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Digite seu nome'
+                            : null,
+                      ),
+                      const SizedBox(height: 20),
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: appInputDecoration(
+                          context,
+                          label: 'Email',
+                          icon: Icons.email_outlined,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Digite seu email';
+                          }
+                          if (!value.contains('@')) return 'Email inválido';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: obscurePassword,
+                        decoration:
+                            appInputDecoration(
+                              context,
+                              label: 'Senha',
+                              icon: Icons.lock_outline_rounded,
+                            ).copyWith(
+                              suffixIcon: IconButton(
+                                tooltip: obscurePassword
+                                    ? 'Mostrar senha'
+                                    : 'Ocultar senha',
+                                icon: Icon(
+                                  obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                                onPressed: () => setState(
+                                  () => obscurePassword = !obscurePassword,
+                                ),
+                              ),
                             ),
-                            onPressed: () => setState(
-                              () => obscurePassword = !obscurePassword,
-                            ),
+                        validator: (value) =>
+                            value == null || value.isEmpty || value.length < 6
+                            ? 'A senha deve ter no mínimo 6 caracteres'
+                            : null,
+                      ),
+                      const SizedBox(height: 32),
+
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: [
+                              theme.colorScheme.primary,
+                              theme.colorScheme.primary.withValues(alpha: 0.8),
+                            ],
                           ),
                         ),
-                      ),
-                      validator: (value) =>
-                          value == null || value.isEmpty || value.length < 6
-                          ? 'A senha deve ter no mínimo 6 caracteres'
-                          : null,
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Botão Principal de Cadastro 
-                    Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.8),
-                          ],
-                        ),
-                      ),
-                      child: Semantics(
-                        label: 'Cadastrar nova conta',
-                        hint: 'Envia os dados preenchidos e realiza a criação do seu perfil',
-                        button: true,
                         child: ElevatedButton(
                           onPressed: authVM.isLoading ? null : _efetuarCadastro,
                           style: ElevatedButton.styleFrom(
@@ -193,8 +192,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           child: authVM.isLoading
-                              ? const CircularProgressIndicator(
-                                  color: AppColors.onPrimary,
+                              ? Semantics(
+                                  label: 'Cadastrando conta',
+                                  liveRegion: true,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.onPrimary,
+                                  ),
                                 )
                               : const Text(
                                   'CADASTRAR',
@@ -205,8 +208,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

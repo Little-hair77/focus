@@ -4,6 +4,7 @@ import 'package:focus/shared/utils/logout.dart';
 import 'package:focus/shared/widgets/app_version.dart';
 import 'package:provider/provider.dart';
 
+/// Drawer lateral com navegação de conta e ações globais.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -16,7 +17,7 @@ class AppDrawer extends StatelessWidget {
     final initial = userName.trim().isEmpty ? 'U' : userName[0].toUpperCase();
 
     void navigateTo(String routeName) {
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop(); // Fecha o drawer primeiro
       Navigator.of(context).pushNamed(routeName);
     }
 
@@ -51,7 +52,10 @@ class AppDrawer extends StatelessWidget {
               children: [
                 // Link Direto para o Modo Foco Geral
                 ListTile(
-                  leading: const Icon(Icons.hourglass_empty_rounded, color: Colors.amber),
+                  leading: const Icon(
+                    Icons.hourglass_empty_rounded,
+                    color: Colors.amber,
+                  ),
                   title: const Text(
                     'Modo Foco',
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -59,13 +63,11 @@ class AppDrawer extends StatelessWidget {
                   onTap: () => navigateTo('/focus'),
                 ),
 
-                // Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
+                // ⚙️ NOVO: Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
                 ListTile(
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Configurações'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  onTap: () => navigateTo('/settings'),
                 ),
               ],
             ),
@@ -76,10 +78,13 @@ class AppDrawer extends StatelessWidget {
           // Ação de Logout isolada na base
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.redAccent),
-            title: const Text('Sair', style: TextStyle(color: Colors.redAccent)),
+            title: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.redAccent),
+            ),
             onTap: () => logout(context, authVM),
           ),
-          
+
           // Versão do Aplicativo no Rodapé
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16.0),

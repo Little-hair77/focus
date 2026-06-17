@@ -6,10 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:focus/features/auth/models/user_model.dart' as app_user;
 import 'package:focus/features/auth/services/login_access_recorder.dart';
 
+/// Controla autenticação, perfil do usuário e auditoria de login.
 class AuthViewModel extends ChangeNotifier {
+  /// Instância do Firebase Auth usada para login e sessão.
   final firebase_auth.FirebaseAuth _auth;
+
+  /// Instância do Firestore usada para carregar dados do perfil.
   final FirebaseFirestore _firestore;
+
+  /// Serviço opcional que registra auditoria de acessos.
   final LoginAccessRecorder? _loginAccessRecorder;
+
+  /// Assinatura que observa mudanças de sessão do Firebase.
   late final StreamSubscription<firebase_auth.User?> _authSubscription;
 
   bool _isLoading = false;
@@ -36,15 +44,31 @@ class AuthViewModel extends ChangeNotifier {
     );
   }
 
+  /// Indica se há uma operação de autenticação em andamento.
   bool get isLoading => _isLoading;
+
+  /// Indica se a restauração inicial da sessão terminou.
   bool get isInitialized => _isInitialized;
+
+  /// Indica se há usuário autenticado.
   bool get isLoggedIn => _currentUser != null;
+
+  /// Última mensagem de erro de autenticação.
   String? get errorMessage => _errorMessage;
+
+  /// Versão incremental usada para recarregar auditoria de acessos.
   int get accessLogVersion => _accessLogVersion;
+
+  /// Usuário atual mapeado para o modelo do app.
   app_user.User? get currentUser => _currentUser;
+
+  /// Nome do usuário atual.
   String? get userName => _currentUser?.name;
+
+  /// E-mail do usuário atual.
   String? get userEmail => _currentUser?.email;
 
+  /// Realiza login por e-mail e senha.
   Future<bool> login(String email, String password) async {
     return _runAuthAction(() async {
       final credential = await _auth.signInWithEmailAndPassword(
@@ -67,6 +91,7 @@ class AuthViewModel extends ChangeNotifier {
     });
   }
 
+  /// Cria conta por e-mail e senha.
   Future<bool> register(String name, String email, String password) async {
     return _runAuthAction(() async {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -96,6 +121,7 @@ class AuthViewModel extends ChangeNotifier {
     });
   }
 
+  /// Encerra a sessão atual.
   Future<void> logout() async {
     _setLoading(true);
     try {
@@ -112,6 +138,7 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Executa uma ação de autenticação padronizando loading e erro.
   Future<bool> _runAuthAction(Future<void> Function() action) async {
     _setLoading(true);
     _errorMessage = null;
@@ -135,6 +162,7 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Reage a mudanças de sessão vindas do Firebase Auth.
   Future<void> _handleAuthChanged(firebase_auth.User? firebaseUser) async {
     if (firebaseUser == null) {
       _currentUser = null;
@@ -146,6 +174,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Carrega o perfil persistido ou cria fallback a partir do Firebase Auth.
   Future<void> _loadUserProfile(firebase_auth.User firebaseUser) async {
     try {
       final snapshot = await _firestore
@@ -175,11 +204,13 @@ class AuthViewModel extends ChangeNotifier {
     );
   }
 
+  /// Atualiza o estado de carregamento e notifica a interface.
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
+  /// Traduz códigos do Firebase Auth para mensagens exibíveis.
   String _messageForCode(String code) {
     switch (code) {
       case 'invalid-email':
