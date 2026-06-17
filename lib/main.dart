@@ -59,7 +59,6 @@ void main() async {
   final themeViewModel = ThemeViewModel();
   await themeViewModel.loadSettings();
   await initializeDateFormatting('pt-BR', null);
-  
   runApp(
     MultiProvider(
       providers: [
@@ -164,7 +163,7 @@ class FocusApp extends StatelessWidget {
       '/tasks' => const AuthGate(authenticatedScreen: TaskListScreen()),
       '/categories' => const AuthGate(
         authenticatedScreen: CategoryListScreen(),
-      ),
+        ),
       '/trash' => const AuthGate(authenticatedScreen: TrashScreen()),
       '/focus' => const AuthGate(authenticatedScreen: FocusModeScreen()),
       '/profile' => const AuthGate(authenticatedScreen: ProfileScreen()),

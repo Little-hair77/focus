@@ -4,13 +4,15 @@ import 'package:focus/shared/utils/logout.dart';
 import 'package:focus/shared/widgets/app_version.dart';
 import 'package:provider/provider.dart';
 
-/// Drawer lateral com navegação de conta e ações globais.
+/// Drawer lateral customizado com navegação, gerenciamento de tema e dados da conta.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final authVM = context.watch<AuthViewModel>();
     final userName = authVM.userName ?? 'Usuário';
     final userEmail = authVM.userEmail ?? '';
@@ -22,75 +24,197 @@ class AppDrawer extends StatelessWidget {
     }
 
     return Drawer(
-      child: Column(
-        children: [
-          // Cabeçalho com dados do Usuário
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(color: theme.colorScheme.primary),
-            accountName: Text(
-              userName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            accountEmail: Text(userEmail),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: theme.colorScheme.onPrimary,
-              child: Text(
-                initial,
-                style: TextStyle(
-                  fontSize: 24,
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // CABEÇALHO CUSTOMIZADO E CLEAN
+            Container(
+              padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.primary.withValues(alpha: 0.8),
+                  ],
                 ),
               ),
-            ),
-          ),
-
-          // Menu de Opções Enxuto e Clean
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                // Link Direto para o Modo Foco Geral
-                ListTile(
-                  leading: const Icon(
-                    Icons.hourglass_empty_rounded,
-                    color: Colors.amber,
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: theme.colorScheme.onPrimary,
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        fontSize: 26,
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  title: const Text(
-                    'Modo Foco',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          userName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          userEmail,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                  onTap: () => navigateTo('/focus'),
-                ),
-
-                // ⚙️ NOVO: Configurações do Aplicativo (Para centralizar Tema e mais ajustes futuros)
-                ListTile(
-                  leading: const Icon(Icons.settings_outlined),
-                  title: const Text('Configurações'),
-                  onTap: () => navigateTo('/settings'),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const Divider(),
+            // LISTA DE OPÇÕES ESTILIZADA (Material 3 Style)
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                children: [
+                  _buildSectionHeader('Navegação'),
+                  
+                  _buildDrawerItem(
+                    icon: Icons.hourglass_empty_rounded,
+                    label: 'Modo Foco',
+                    iconColor: Colors.amber,
+                    theme: theme,
+                    onTap: () => navigateTo('/focus'),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.assignment_outlined,
+                    label: 'Minhas Tarefas',
+                    theme: theme,
+                    onTap: () => navigateTo('/tasks'),
+                  ),
 
-          // Ação de Logout isolada na base
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.redAccent),
-            title: const Text(
-              'Sair',
-              style: TextStyle(color: Colors.redAccent),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
+                  ),
+                  
+                  _buildSectionHeader('Preferências'),
+
+                  // ALTERNADOR DE TEMA INTERATIVO
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: SwitchListTile(
+                      secondary: Icon(
+                        isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        color: isDark ? Colors.purpleAccent : Colors.orange,
+                      ),
+                      title: Text(
+                        isDark ? 'Modo Escuro' : 'Modo Claro',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                      value: isDark,
+                      activeColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      onChanged: (bool value) {
+                        // TODO: Inserir a lógica de toggleTheme do seu Provider aqui
+                      },
+                    ),
+                  ),
+
+                  _buildDrawerItem(
+                    icon: Icons.settings_outlined,
+                    label: 'Configurações',
+                    theme: theme,
+                    onTap: () => navigateTo('/settings'),
+                  ),
+                ],
+              ),
             ),
-            onTap: () => logout(context, authVM),
-          ),
 
-          // Versão do Aplicativo no Rodapé
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: AppVersion(),
+            Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
+
+            // AÇÃO DE SAIR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              child: _buildDrawerItem(
+                icon: Icons.logout_rounded,
+                label: 'Sair',
+                iconColor: Colors.redAccent,
+                textColor: Colors.redAccent,
+                theme: theme,
+                onTap: () => logout(context, authVM),
+              ),
+            ),
+
+            // VERSÃO DO APLICATIVO
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 20.0),
+              child: Center(
+                child: const AppVersion(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String label,
+    required ThemeData theme,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: ListTile(
+        leading: Icon(icon, color: iconColor ?? theme.colorScheme.onSurfaceVariant),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: textColor ?? theme.textTheme.bodyLarge?.color,
           ),
-        ],
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        horizontalTitleGap: 12,
+        onTap: onTap,
       ),
     );
   }
