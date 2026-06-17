@@ -143,6 +143,7 @@ class FocusApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Focus',
+      showSemanticsDebugger: false, // Linha temporária
       debugShowCheckedModeBanner: false,
       themeMode: themeVM.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: AppTheme.lightTheme,
