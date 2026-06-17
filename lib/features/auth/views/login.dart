@@ -129,7 +129,6 @@ class _LoginPageState extends State<LoginPage> {
                                   fit: BoxFit.contain,
                                 ),
                               ),
-                              // O texto agora usa uma transformação leve para subir e anular o padding da imagem
                               Transform.translate(
                                 offset: const Offset(0, -10),
                                 child: Text(
@@ -181,27 +180,29 @@ class _LoginPageState extends State<LoginPage> {
                             TextFormField(
                               controller: _senhaController,
                               obscureText: obscurePassword,
-                              decoration:
-                                  appInputDecoration(
-                                    context,
-                                    label: 'Senha',
-                                    icon: Icons.lock_outline_rounded,
-                                  ).copyWith(
-                                    suffixIcon: IconButton(
-                                      tooltip: obscurePassword
-                                          ? 'Mostrar senha'
-                                          : 'Ocultar senha',
-                                      icon: Icon(
-                                        obscurePassword
-                                            ? Icons.visibility_outlined
-                                            : Icons.visibility_off_outlined,
-                                      ),
-                                      onPressed: () => setState(
-                                        () =>
-                                            obscurePassword = !obscurePassword,
-                                      ),
+                              decoration: appInputDecoration(
+                                context,
+                                label: 'Senha',
+                                icon: Icons.lock_outline_rounded,
+                              ).copyWith(
+                                // Semantics reativo injetado no botão do "olhinho"
+                                suffixIcon: Semantics(
+                                  label: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                                  hint: 'Toque duas vezes para alternar a visibilidade da senha',
+                                  button: true,
+                                  child: IconButton(
+                                    tooltip: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                                    icon: Icon(
+                                      obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () => setState(
+                                      () => obscurePassword = !obscurePassword,
                                     ),
                                   ),
+                                ),
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Digite sua senha';
@@ -215,53 +216,63 @@ class _LoginPageState extends State<LoginPage> {
 
                             const SizedBox(height: 32),
 
-                            // Botão de Entrar com gradiente dinâmico
+                            // Botão de Entrar
                             SizedBox(
                               width: double.infinity,
                               height: 56,
-                              child: ElevatedButton(
-                                onPressed: authVM.isLoading
-                                    ? null
-                                    : _efetuarLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.primary,
-                                  foregroundColor: theme.colorScheme.onPrimary,
-                                  elevation:
-                                      2, // Uma leve sombra para dar profundidade
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                              // Semantics englobando o ElevatedButton inteiro de Login
+                              child: Semantics(
+                                label: 'Entrar no aplicativo',
+                                hint: 'Verifica as credenciais inseridas e inicia sua sessão',
+                                button: true,
+                                child: ElevatedButton(
+                                  onPressed: authVM.isLoading ? null : _efetuarLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: theme.colorScheme.primary,
+                                    foregroundColor: theme.colorScheme.onPrimary,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
+                                  child: authVM.isLoading
+                                      ? Semantics(
+                                          label: 'Autenticando acesso',
+                                          liveRegion: true,
+                                          child: const CircularProgressIndicator(
+                                            color: AppColors.onPrimary,
+                                          ),
+                                        )
+                                      : const Text(
+                                          'ENTRAR',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.2,
+                                            fontSize: 16,
+                                          ),
+                                        ),
                                 ),
-                                child: authVM.isLoading
-                                    ? Semantics(
-                                        label: 'Entrando',
-                                        liveRegion: true,
-                                        child: CircularProgressIndicator(
-                                          color: AppColors.onPrimary,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'ENTRAR',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.2,
-                                          fontSize: 16,
-                                        ),
-                                      ),
                               ),
                             ),
 
                             const SizedBox(height: 24),
 
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/register');
-                              },
-                              child: Text(
-                                'Não tem uma conta? Criar conta',
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
+                            // Links de Cadastro
+                            // Semantics envolvendo o botão de texto para navegação guiada
+                            Semantics(
+                              label: 'Ir para tela de criação de conta',
+                              hint: 'Abre o formulário para se cadastrar como novo usuário no Focus',
+                              button: true,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/register');
+                                },
+                                child: Text(
+                                  'Não tem uma conta? Criar conta',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),

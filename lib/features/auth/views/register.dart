@@ -67,13 +67,19 @@ class _RegisterPageState extends State<RegisterPage> {
         appBar: AppBar(
           backgroundColor: AppColors.transparent,
           elevation: 0,
-          leading: IconButton(
-            tooltip: 'Voltar',
-            icon: Icon(
-              Icons.arrow_back_ios_new,
-              color: theme.colorScheme.primary,
+          // Adicionado rótulo semântico ao botão de voltar
+          leading: Semantics(
+            label: 'Voltar para a tela de login',
+            hint: 'Retorna ao formulário de autenticação anterior',
+            button: true,
+            child: IconButton(
+              tooltip: 'Voltar',
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: theme.colorScheme.primary,
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
-            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: SafeArea(
@@ -143,26 +149,29 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: obscurePassword,
-                        decoration:
-                            appInputDecoration(
-                              context,
-                              label: 'Senha',
-                              icon: Icons.lock_outline_rounded,
-                            ).copyWith(
-                              suffixIcon: IconButton(
-                                tooltip: obscurePassword
-                                    ? 'Mostrar senha'
-                                    : 'Ocultar senha',
-                                icon: Icon(
-                                  obscurePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                ),
-                                onPressed: () => setState(
-                                  () => obscurePassword = !obscurePassword,
-                                ),
+                        decoration: appInputDecoration(
+                          context,
+                          label: 'Senha',
+                          icon: Icons.lock_outline_rounded,
+                        ).copyWith(
+                          // Semantics dinâmico no suffixIcon para leitura correta do estado da senha
+                          suffixIcon: Semantics(
+                            label: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                            hint: 'Toque duas vezes para alternar a visibilidade dos caracteres',
+                            button: true,
+                            child: IconButton(
+                              tooltip: obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                              icon: Icon(
+                                obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: () => setState(
+                                () => obscurePassword = !obscurePassword,
                               ),
                             ),
+                          ),
+                        ),
                         validator: (value) =>
                             value == null || value.isEmpty || value.length < 6
                             ? 'A senha deve ter no mínimo 6 caracteres'
@@ -170,6 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 32),
 
+                      // Semantics englobando o ElevatedButton inteiro
                       Container(
                         width: double.infinity,
                         height: 56,
@@ -182,30 +192,35 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                         ),
-                        child: ElevatedButton(
-                          onPressed: authVM.isLoading ? null : _efetuarCadastro,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.transparent,
-                            shadowColor: AppColors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        child: Semantics(
+                          label: 'Finalizar cadastro e criar conta',
+                          hint: 'Envia as informações preenchidas para criar seu perfil',
+                          button: true,
+                          child: ElevatedButton(
+                            onPressed: authVM.isLoading ? null : _efetuarCadastro,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.transparent,
+                              shadowColor: AppColors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
+                            child: authVM.isLoading
+                                ? Semantics(
+                                    label: 'Cadastrando conta',
+                                    liveRegion: true,
+                                    child: const CircularProgressIndicator(
+                                      color: AppColors.onPrimary,
+                                    ),
+                                  )
+                                : const Text(
+                                    'CADASTRAR',
+                                    style: TextStyle(
+                                      color: AppColors.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                          child: authVM.isLoading
-                              ? Semantics(
-                                  label: 'Cadastrando conta',
-                                  liveRegion: true,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.onPrimary,
-                                  ),
-                                )
-                              : const Text(
-                                  'CADASTRAR',
-                                  style: TextStyle(
-                                    color: AppColors.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
                         ),
                       ),
                     ],
