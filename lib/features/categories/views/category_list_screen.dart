@@ -3,6 +3,7 @@ import 'package:focus/core/theme/app_colors.dart';
 import 'package:focus/features/categories/viewmodels/category_view_model.dart';
 import 'package:focus/features/categories/views/category_form_screen.dart';
 import 'package:focus/features/categories/widgets/category_empty_state.dart';
+import 'package:focus/features/categories/views/category_detail_screen.dart'; 
 import 'package:focus/shared/widgets/app_bar.dart';
 import 'package:focus/shared/widgets/app_drawer.dart';
 import 'package:focus/shared/widgets/bottom_navigation_bar.dart';
@@ -10,6 +11,7 @@ import 'package:focus/shared/widgets/gesture_navigation.dart';
 import 'package:focus/shared/models/trash_drag_data.dart';
 import 'package:provider/provider.dart';
 
+/// Tela de listagem e criação de categorias.
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
 
@@ -29,7 +31,6 @@ class CategoryListScreen extends StatelessWidget {
     } else if (lowerName.contains('lazer') || lowerName.contains('viagem') || lowerName.contains('hobby')) {
       return {'icon': Icons.sports_esports_rounded, 'color': Colors.teal};
     }
-    // Fallback padrão elegante caso não dê match em nenhuma palavra-chave
     return {'icon': Icons.folder_special_rounded, 'color': Colors.blueGrey};
   }
 
@@ -39,7 +40,6 @@ class CategoryListScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Define o número de colunas da grade baseado na largura da tela (Responsivo)
     int crossAxisCount = 2;
     if (screenWidth > 600) crossAxisCount = 3;
     if (screenWidth > 900) crossAxisCount = 4;
@@ -63,7 +63,6 @@ class CategoryListScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TÍTULO FLUIDO COM CONTAGEM SUBSIDIÁRIA
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -94,7 +93,6 @@ class CategoryListScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // ÁREA PRINCIPAL DA GRADE DE CONTEÚDO
                     Expanded(
                       child: categoryVM.isLoading
                           ? Semantics(
@@ -114,7 +112,7 @@ class CategoryListScreen extends StatelessWidget {
                                     crossAxisCount: crossAxisCount,
                                     crossAxisSpacing: 16,
                                     mainAxisSpacing: 16,
-                                    childAspectRatio: 1.3, 
+                                    childAspectRatio: 1.25, 
                                   ),
                                   itemCount: categoryVM.categories.length,
                                   itemBuilder: (context, index) {
@@ -123,7 +121,6 @@ class CategoryListScreen extends StatelessWidget {
                                     final Color catColor = style['color'];
                                     final IconData catIcon = style['icon'];
 
-                                    // Draggable para a lixeira integrada do seu BottomBar
                                     return Draggable<TrashDragData>(
                                       data: TrashDragData(id: category.id, type: TrashItemType.category),
                                       feedback: Material(
@@ -141,9 +138,9 @@ class CategoryListScreen extends StatelessWidget {
                                       ),
                                       childWhenDragging: Opacity(
                                         opacity: 0.3,
-                                        child: _buildCategoryCard(category.name, catColor, catIcon, theme),
+                                        child: _buildCategoryCard(context, category, catColor, catIcon, theme),
                                       ),
-                                      child: _buildCategoryCard(category.name, catColor, catIcon, theme),
+                                      child: _buildCategoryCard(context, category, catColor, catIcon, theme),
                                     );
                                   },
                                 ),
@@ -177,48 +174,93 @@ class CategoryListScreen extends StatelessWidget {
     );
   }
 
-  /// CONSTRUTOR DE CARTÃO  
-  Widget _buildCategoryCard(String name, Color color, IconData icon, ThemeData theme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  ///  CONSTRUTOR DE CARTÃO PREMIUM COM REDIRECIONAMENTO CORRIGIDO
+  Widget _buildCategoryCard(BuildContext context, dynamic category, Color color, IconData icon, ThemeData theme) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryDetailScreen(category: category),
           ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // MICRO-CONTAINER PARA O ÍCONE (Com fundo tonificado)
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-            child: Icon(icon, color: color, size: 26),
-          ),
-          
-          // NOME DA CATEGORIA EM DESTAQUE
-          Text(
-            name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              height: 1.2,
+          ],
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(maxWidth: 120),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CategoryFormScreen(category: category),
+                        ),
+                      );
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Text('Editar', style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                category.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
