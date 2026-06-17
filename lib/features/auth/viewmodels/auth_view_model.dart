@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:focus/features/auth/models/user_model.dart' as app_user;
 import 'package:focus/features/auth/services/login_access_recorder.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Controla autenticação, perfil do usuário e auditoria de login.
 class AuthViewModel extends ChangeNotifier {
@@ -13,6 +14,9 @@ class AuthViewModel extends ChangeNotifier {
 
   /// Instância do Firestore usada para carregar dados do perfil.
   final FirebaseFirestore _firestore;
+
+  /// Instância do GoogleSignIn (v6).
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   /// Serviço opcional que registra auditoria de acessos.
   final LoginAccessRecorder? _loginAccessRecorder;
@@ -91,6 +95,70 @@ class AuthViewModel extends ChangeNotifier {
     });
   }
 
+  /// Realiza a autenticação e cadastro via conta Google (v6).
+  Future<bool> signInWithGoogle() async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      final googleUser = await _googleSignIn.signIn();
+
+      // Retorna false silenciosamente se o usuário cancelar
+      if (googleUser == null) {
+        _setLoading(false);
+        return false;
+      }
+
+      final googleAuth = await googleUser.authentication;
+
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      final firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        throw Exception('Usuário não retornado pelo Google.');
+      }
+
+      final docRef = _firestore.collection('users').doc(firebaseUser.uid);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        await docRef.set({
+          'id': firebaseUser.uid,
+          'name': firebaseUser.displayName ?? 'Usuário',
+          'email': firebaseUser.email ?? '',
+          'photo_url': firebaseUser.photoURL,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }
+
+      try {
+        await _loginAccessRecorder?.record(firebaseUser.uid);
+        if (_loginAccessRecorder != null) {
+          _accessLogVersion++;
+        }
+      } catch (e) {
+        debugPrint('Erro ao registrar acesso: $e');
+      }
+
+      return true;
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      debugPrint('Erro Firebase Auth Google: code=${e.code}');
+      _errorMessage = _messageForCode(e.code);
+      return false;
+    } catch (e) {
+      _errorMessage = 'Não foi possível concluir a operação.';
+      debugPrint('Erro de autenticação com Google: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   /// Cria conta por e-mail e senha.
   Future<bool> register(String name, String email, String password) async {
     return _runAuthAction(() async {
@@ -105,6 +173,7 @@ class AuthViewModel extends ChangeNotifier {
 
       final trimmedName = name.trim();
       await firebaseUser.updateDisplayName(trimmedName);
+
       try {
         await _firestore.collection('users').doc(firebaseUser.uid).set({
           'id': firebaseUser.uid,
@@ -116,6 +185,7 @@ class AuthViewModel extends ChangeNotifier {
       } catch (e) {
         debugPrint('Erro ao salvar perfil do usuário: $e');
       }
+
       await firebaseUser.reload();
       await _loadUserProfile(_auth.currentUser ?? firebaseUser);
     });
@@ -125,6 +195,7 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> logout() async {
     _setLoading(true);
     try {
+      await _googleSignIn.signOut();
       await _auth.signOut();
       _currentUser = null;
       _errorMessage = null;
@@ -204,7 +275,7 @@ class AuthViewModel extends ChangeNotifier {
     );
   }
 
-  /// Atualiza o estado de carregamento e notifica a interface.
+  /// Computa o estado de carregamento e notifica a interface.
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
